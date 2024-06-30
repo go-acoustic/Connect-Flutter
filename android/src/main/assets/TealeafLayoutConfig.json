@@ -1,0 +1,44 @@
+{
+  "AutoLayout": {
+    "GlobalScreenSettings":{
+      "ScreenChange": true,
+      "DisplayName": "",
+      "CaptureLayoutDelay": 1000,
+      "ScreenShot": true,
+      "NumberOfWebViews": 0,
+      "CaptureUserEvents": true,
+      "CaptureScreenVisits": true,
+      "CaptureLayoutOn": 2,
+      "CaptureScreenshotOn": 2,
+      "Masking": {
+        "HasMasking": true,
+        "HasCustomMask": true,
+        "Sensitive": {
+          "capitalCaseAlphabet": "X",
+          "number": "9",
+          "smallCaseAlphabet": "x",
+          "symbol": "#"
+        },
+        "MaskAccessibilityLabelList": [
+          "username",
+          "Shrine - Connect masking label"
+        ]
+      }
+    },
+    "MainActivity": {
+      "ScreenChange": false,
+      "DisplayName": "Home",
+      "CaptureLayoutOn": 2,
+      "CaptureScreenshotOn": 2
+    }
+  },
+  "AppendMapIds": {
+    "com.any.package:id/givenIdOnXmlLayout1": {
+      "mid": "giveAdditionalId1"
+    },
+    "com.any.package:id/givenIdOnXmlLayout2": {
+      "mid": "giveAdditionalId2"
+    }
+  }
+}
+

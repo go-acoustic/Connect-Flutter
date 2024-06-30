@@ -1,0 +1,53 @@
+group 'com.example.connect_flutter_plugin'
+version '1.0'
+
+buildscript {
+    ext.kotlin_version = '1.8.10'
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        // Connect staging repo
+        // maven { url "https://s01.oss.sonatype.org/content/groups/staging" }
+        maven { url "https://s01.oss.sonatype.org/content/repositories/staging" }
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdk 33
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion 21
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+
+    implementation 'io.github.go-acoustic:connect:+'
+
+    // For testing local jars only
+    //    implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
+    //    api files('libs/tealeafmod.jar')
+    // api files('libs/tealeafMod-release.aar')
+}
