@@ -1,0 +1,24 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Connect CLI",
+            "command": "dart",
+            // Path to the task file, 2 args AppKey, PostMessageURL
+            "args": [
+                "../../package/connect_cli/bin/connect_cli.dart",
+                "fa47722a7fef4bcd8677fd8d6d113a0d",
+                "https://lib-us-2.brilliantcollector.com/collector/collectorPost"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                // Optional: Specify the cwd if your script needs to be run from a specific directory
+                "cwd": "${workspaceFolder}"
+            }
+        }
+    ]
+}

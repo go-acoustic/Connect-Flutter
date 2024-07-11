@@ -1,0 +1,18 @@
+include: package:lints/recommended.yaml
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
+analyzer:
+  errors:
+    include_file_not_found: ignore
+    uri_does_not_exist: ignore
+    undefined_identifier: ignore
+  exclude:
+    - connect_aop/**
+    - scripts/**
+
+linter:
+  rules:
+    - avoid_as: false
+    - uri_does_not_exist: ignore
+    - undefined_identifier: ignore

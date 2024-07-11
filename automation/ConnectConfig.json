@@ -1,0 +1,50 @@
+{
+  "Connect": {
+    "AppKey": "fa47722a7fef4bcd8677fd8d6d113a0d",
+    "PostMessageUrl": "https://lib-us-2.brilliantcollector.com/collector/collectorPost",
+    "KillSwitchUrl": "https://lib-us-2.brilliantcollector.com/collector/switch/fa47722a7fef4bcd8677fd8d6d113a0d",
+    "useRelease": false,
+    "iOSVersion": "",
+    "AndroidVersion": "",
+    "layoutConfig": {
+      "AutoLayout": {
+        "GlobalScreenSettings": {
+          "ScreenChange": true,
+          "DisplayName": "Example",
+          "CaptureLayoutDelay": 500,
+          "ScreenShot": true,
+          "NumberOfWebViews": 0,
+          "CaptureUserEvents": true,
+          "CaptureScreenVisits": false,
+          "CaptureLayoutOn": 2,
+          "CaptureScreenshotOn": 2,
+          "Masking": {
+            "HasMasking": true,
+            "HasCustomMask": true,
+            "Sensitive": {
+              "capitalCaseAlphabet": "X",
+              "number": "9",
+              "smallCaseAlphabet": "x",
+              "symbol": "#"
+            },
+            "MaskAccessibilityLabelList": [
+              "username",
+              "Shrine - Connect masking label"
+            ]
+          }
+        }
+      },
+      "AppendMapIds": {
+        "[w,9290],[v,0]": {
+          "mid": "ASimpleUIView"
+        },
+        "tag2999999": {
+          "mid": "giveAdditionalId1"
+        },
+        "idxPathValue": {
+          "mid": "giveAdditionalId2"
+        }
+      }
+    }
+  }
+}
