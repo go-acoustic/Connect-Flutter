@@ -285,6 +285,14 @@ class TlBinder extends WidgetsBindingObserver {
   void updateScroll(Offset? position, Duration? timeStamp) {
     scrollCapture?.updatePosition = position ?? Offset(0, 0);
     scrollCapture?.updateTimestamp = timeStamp ?? Duration();
+
+    if (scrollCapture != null) {
+      final _Swipe swipe = scrollCapture!;
+
+      if (swipe.getUpdatePosition != null && swipe.velocity != null) {
+        Connect.isSwiping = true;
+      }
+    }
   }
 
   void endScroll(Velocity? velocity) {
@@ -292,7 +300,6 @@ class TlBinder extends WidgetsBindingObserver {
         velocity ?? Velocity(pixelsPerSecond: Offset(0, 0));
     scrollCapture?.calculateSwipe();
 
-    Connect.isSwiping = false;
     checkForScroll();
   }
 
@@ -342,6 +349,9 @@ class TlBinder extends WidgetsBindingObserver {
           // Handle errors if the async function throws an error
           tlLogger.e('Error: $error');
         });
+
+        // For Cancelling the pointerUp event
+        Connect.isSwiping = false;
       } else {
         tlLogger.v('Incomplete scroll before frame');
       }

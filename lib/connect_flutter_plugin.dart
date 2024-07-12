@@ -88,34 +88,33 @@ class Connect extends StatelessWidget {
           onPointerUp: (details) {
             ConnectHelper.pointerEventHelper("UP", details);
 
-            // Handle onPointerUp event here
-            // Start time as reference when there's navigation change
-            Connect.startTime = DateTime.now().millisecondsSinceEpoch;
+            if (!Connect.isSwiping) {
+              // Handle onPointerUp event here
+              // Start time as reference when there's navigation change
+              Connect.startTime = DateTime.now().millisecondsSinceEpoch;
 
-            logWidgetTree().then((result) async {
-              var touchedTarget =
-                  findTouchedWidget(context, details.position);
+              logWidgetTree().then((result) async {
+                var touchedTarget =
+                    findTouchedWidget(context, details.position);
 
-              // Handle onTap gesture and Pass the result to Connect plugin
-              await PluginConnect.onTlGestureEvent(
-                  gesture: "tap",
-                  id: wp.widgetPath(),
-                  target: touchedTarget,
-                  data: null,
-                  layoutParameters: result);
-            }).catchError((error) {
-              // Handle errors if the async function throws an error
-              tlLogger.e('Error: $error');
-            });
-
-            Connect.isSwiping = false;
+                // Handle onTap gesture and Pass the result to Connect plugin
+                await PluginConnect.onTlGestureEvent(
+                    gesture: "tap",
+                    id: wp.widgetPath(),
+                    target: touchedTarget,
+                    data: null,
+                    layoutParameters: result);
+              }).catchError((error) {
+                // Handle errors if the async function throws an error
+                tlLogger.e('Error: $error');
+              });
+            }
           },
           onPointerDown: (details) {
             ConnectHelper.pointerEventHelper("DOWN", details);
           },
           onPointerMove: (details) {
             tlLogger.v("Gesture move, swipe event checkForScroll() will fire..");
-            Connect.isSwiping = true;
             ConnectHelper.pointerEventHelper("MOVE", details);
           },
           child: child,
@@ -457,11 +456,6 @@ Future<List<Map<String, dynamic>>> parseWidgetTree(Element element) async {
 
     /// Starting to parse tree
     traverse(element, 0);
-
-    // Encode the JSON object
-    String jsonString = jsonEncode(widgetTree);
-
-    PluginConnect.tlApplicationCustomEvent(eventName: jsonString);
   } catch (error) {
     // Handle errors using try-catch block
     tlLogger.v('Error caught in try-catch: $error');

@@ -34,7 +34,6 @@ import com.tl.uic.model.EventInfo;
 import com.tl.uic.model.Gesture;
 import com.tl.uic.model.GestureControl;
 import com.tl.uic.model.GestureControlPosition;
-import com.tl.uic.model.GesturePlaceHolder;
 import com.tl.uic.model.IdType;
 import com.tl.uic.model.Image;
 import com.tl.uic.model.Layout;
@@ -1143,7 +1142,7 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
 
                         ScreenUtil.obscureAndCompress(screenBitmap, maskedPositions);
 
-                        if (Connect.INSTANCE.getGesturePlaceHolder().size() > 0) {
+                        if (!Connect.INSTANCE.getGesturePlaceHolder().isEmpty()) {
                             Connect.INSTANCE.getGesturePlaceHolder().take(); // Remove placeholder (not needed?)
                         }
                         logGestureEvent(activity, tlType, args, EOCore.getDefaultLogLevel());
@@ -1153,7 +1152,7 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
                     }
                 }
             } catch (final Exception e) {
-                com.tl.uic.util.LogInternal.logException(e, "Connect plugin error:  Trying to log screenview.");
+                com.tl.uic.util.LogInternal.logException(e, "Connect plugin error:  Trying to log Gesture.");
             } finally {
                 GestureUtil.isFlutterGestureEvent = false;
             }
@@ -1165,19 +1164,21 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
         LOGGER.log(Level.INFO, "Connect pointer event at: " + checkForParameter(args, "position", "dx") +
                 ',' + checkForParameter(args, "position", "dy"));
 
-        if (EOCore.getConfigItemBoolean("SetGestureDetector", TealeafEOLifecycleObject.getInstance())) {
-            final MotionEvent motionEvent = motionEvent(args);
-            final int action = motionEvent.getAction();
-
-            if (action == MotionEvent.ACTION_UP) {
-                lastPointerUpEvent = args;
-                if (Connect.INSTANCE.getGesturePlaceHolder().size() < 1) {
-                    final GesturePlaceHolder gph = new GesturePlaceHolder(Connect.INSTANCE.INSTANCE.getCurrentSessionId(), "");
-                    Connect.INSTANCE.getGesturePlaceHolder().add(gph);
-                    TLFCache.addMessage(gph); // Placeholder needed fr Android native version of gesture control
-                }
-            }
-        }
+//        // We don't need below anymore since the plugin provides Gesture hook, and handling of gesture events
+//        if (EOCore.getConfigItemBoolean("SetGestureDetector", TealeafEOLifecycleObject.getInstance())) {
+//            final MotionEvent motionEvent = motionEvent(args);
+//            assert motionEvent != null;
+//            final int action = motionEvent.getAction();
+//
+//            if (action == MotionEvent.ACTION_UP) {
+//                lastPointerUpEvent = args;
+//                if (Connect.INSTANCE.getGesturePlaceHolder().isEmpty()) {
+//                    final GesturePlaceHolder gph = new GesturePlaceHolder(Connect.INSTANCE.getCurrentSessionId(), "");
+//                    Connect.INSTANCE.getGesturePlaceHolder().add(gph);
+//                    TLFCache.addMessage(gph); // Placeholder needed fr Android native version of gesture control
+//                }
+//            }
+//        }
         lastPointerEvent = args;
     }
 
@@ -1413,35 +1414,40 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
     }
 
     private MotionEvent motionEvent() throws Exception {
-        return motionEvent(lastPointerEvent);
+        return lastPointerEvent != null ? motionEvent(lastPointerEvent) : null;
     }
 
     private MotionEvent motionEvent(Object map) throws Exception {
-        final String event = checkForParameter(map, "action");
-        final int action = (event.equals("DOWN") ? MotionEvent.ACTION_DOWN :
-                (event.equals("UP") ? MotionEvent.ACTION_UP :
-                        (event.equals("MOVE") ? MotionEvent.ACTION_MOVE : -1)));
-        final Double dx = checkForParameter(map, "position", "dx");
-        final Double dy = checkForParameter(map, "position", "dy");
-        final Double dp = checkForParameter(map, "pressure");
-        final float pressure = dp.floatValue();
-        final int device = checkForParameter(map, "kind");
-        final long timestamp = Long.parseLong(checkForParameter(map, "timestamp"));
+        try {
+            final String event = checkForParameter(map, "action");
+            final int action = (event.equals("DOWN") ? MotionEvent.ACTION_DOWN :
+                    (event.equals("UP") ? MotionEvent.ACTION_UP :
+                            (event.equals("MOVE") ? MotionEvent.ACTION_MOVE : -1)));
+            final Double dx = checkForParameter(map, "position", "dx");
+            final Double dy = checkForParameter(map, "position", "dy");
+            final Double dp = checkForParameter(map, "pressure");
+            final float pressure = dp.floatValue();
+            final int device = checkForParameter(map, "kind");
+            final long timestamp = Long.parseLong(checkForParameter(map, "timestamp"));
 
-        final float x = dx.floatValue() * withDensity(scaleWidth);
-        final float y = dy.floatValue() * withDensity(scaleHeight);
+            final float x = dx.floatValue() * withDensity(scaleWidth);
+            final float y = dy.floatValue() * withDensity(scaleHeight);
 
-        LOGGER.log(Level.INFO, "Motion Event - x,y: " + x + "," + y + ", density (scaled), x: " +
-                scaleWidth + ", y: " + scaleHeight);
+            LOGGER.log(Level.INFO, "Motion Event - x,y: " + x + "," + y + ", density (scaled), x: " +
+                    scaleWidth + ", y: " + scaleHeight);
 
-        final MotionEvent me = MotionEvent.obtain(timestamp - lastDown, timestamp, action, x, y, pressure,
-                0.1f, 0, 0.1f, 0.1f, device, 0);
+            final MotionEvent me = MotionEvent.obtain(timestamp - lastDown, timestamp, action, x, y, pressure,
+                    0.1f, 0, 0.1f, 0.1f, device, 0);
 
-        if (action == MotionEvent.ACTION_DOWN) {
-            lastDown = timestamp;
+            if (action == MotionEvent.ACTION_DOWN) {
+                lastDown = timestamp;
+            }
+
+            return me;
+        } catch (final Exception e) {
+            com.tl.uic.util.LogInternal.logException(e, "Connect plugin error:  Trying to get MotionEvent.");
         }
-
-        return me;
+        return null;
     }
 
     private MotionEvent motionEvent(double dx, double dy, long timestamp) {
