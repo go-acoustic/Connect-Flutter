@@ -103,7 +103,7 @@ packages:
       path: "../.."
       relative: true
     source: path
-    version: "2.6.5-beta"
+    version: "2.7.0"
   convert:
     dependency: transitive
     description:
