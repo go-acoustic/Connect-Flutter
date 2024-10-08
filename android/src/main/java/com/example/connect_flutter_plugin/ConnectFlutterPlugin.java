@@ -826,6 +826,8 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
         final Object args = call.arguments;
         final String argString = (args == null) ? "null!" : args.toString();
         final String request = call.method.toLowerCase();
+        String key;
+        String moduleName;
 
         LOGGER.log(Level.INFO, "onMethodCall: " + request + ", args: " + argString);
         FileUtil.setPermissionToWrite(getActivity());
@@ -933,6 +935,15 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
                     result.success(null);
                     break;
                 }
+                case "logsignal": {
+                    if (args == null) {
+                        result.error(NO_ARGS, "logSignal event requires arguments list", getStackTraceAsString());
+                        return;
+                    }
+                    tlLogSignalMessage(args);
+                    result.success(null);
+                    break;
+                }
                 case "connection": {
                     if (args == null) {
                         result.error(NO_ARGS, "connection event requires arguments list", getStackTraceAsString());
@@ -964,6 +975,63 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
                         return;
                     }
                     result.success(tlLogPerformanceMessage(args));
+                    break;
+                case "getbooleanconfigitemforkey":
+                    if (args == null) {
+                        result.error(NO_ARGS, "getbooleanconfigitemforkey event requires arguments list", getStackTraceAsString());
+                        return;
+                    }
+                    key = checkForParameter(args, "key");
+                    moduleName = checkForParameter(args, "moduleName");
+
+                    boolean boolResult = EOCore.getConfigItemBoolean(key, EOCore.getLifecycleObject(moduleName));
+                    result.success(boolResult);
+                    break;
+                case "getstringitemforkey":
+                    if (args == null) {
+                        result.error(NO_ARGS, "getstringitemforkey event requires arguments list", getStackTraceAsString());
+                        return;
+                    }
+                    key = checkForParameter(args, "key");
+                    String theDefault = checkForParameter(args, "theDefault");
+                    moduleName = checkForParameter(args, "moduleName");
+
+                    String stringResult = EOCore.getConfigItemString(key, EOCore.getLifecycleObject(moduleName));
+                    if (TextUtils.isEmpty(stringResult)) {
+                        stringResult = theDefault;
+                    }
+                    result.success(stringResult);
+                    break;
+                case "getnumberitemforkey":
+                    if (args == null) {
+                        result.error(NO_ARGS, "getnumberitemforkey event requires arguments list", getStackTraceAsString());
+                        return;
+                    }
+                    key = checkForParameter(args, "key");
+                    int theDefaultInt = checkForParameter(args, "theDefault");
+                    moduleName = checkForParameter(args, "moduleName");
+
+                    int intResult = EOCore.getConfigItemInt(key, EOCore.getLifecycleObject(moduleName));
+
+                    if (intResult == -1) {
+                     intResult = theDefaultInt;
+                    }
+
+                    result.success(intResult);
+                    break;
+                case "setbooleanconfigitemforkey":
+                case "setstringitemforkey":
+                case "setnumberitemforkey":
+                    if (args == null) {
+                        result.error(NO_ARGS, "Set config item event requires arguments list", getStackTraceAsString());
+                        return;
+                    }
+                    key = checkForParameter(args, "key");
+                    String value = checkForParameter(args,"value").toString();
+                    moduleName = checkForParameter(args, "moduleName");
+
+                    boolean setResult = EOCore.updateConfig(key, value, EOCore.getLifecycleObject(moduleName));
+                    result.success(setResult);
                     break;
                 default:
                     result.notImplemented();
@@ -1064,13 +1132,22 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
     }
 
     void tlCustomEventMessage(Object args) throws Exception {
-        LOGGER.log(Level.INFO, "Connect message custom event");
+        LOGGER.log(Level.INFO, "Connect message logSignal event");
 
         final String eventName = checkForParameter(args, "eventname");
         final HashMap<String, String> customData = parameter(args, "data");
         final Integer logLevel = parameter(args, "loglevel");
 
         Connect.INSTANCE.logCustomEvent(eventName, customData, logLevel == null ? EOCore.getDefaultLogLevel() : logLevel);
+    }
+
+    void tlLogSignalMessage(Object args) throws Exception {
+        LOGGER.log(Level.INFO, "Connect message logSignal event");
+
+        final HashMap<String, Object> customData = parameter(args, "data");
+        final Integer logLevel = parameter(args, "loglevel");
+
+        Connect.INSTANCE.logSignal(customData, logLevel == null ? EOCore.getDefaultLogLevel() : logLevel);
     }
 
     // void tlSetEnvironment(Object args) throws Exception {

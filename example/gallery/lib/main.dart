@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:connect_flutter_plugin/connect_flutter_plugin.dart';
+import 'package:connect_flutter_plugin/logger.dart';
 import 'package:dual_screen/dual_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -23,7 +24,6 @@ import 'firebase_options.dart';
 import 'layout/adaptive.dart';
 
 export 'package:gallery/data/demos.dart' show pumpDeferredLibraries;
-
 
 void main() async {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -48,6 +48,9 @@ void main() async {
   /// Add Tealeaf Wrapper for auto instrumentation
   ///
   runApp(Connect(child: const GalleryApp()));
+
+  /// Sample Connect Plugin APIs for SDK configurable properties
+  await _loadConfigItems();
 }
 
 class GalleryApp extends StatelessWidget {
@@ -62,6 +65,24 @@ class GalleryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Connect logSignal API sample
+    PluginConnect.logSignal(signalData: {
+      'behaviorType': 'orderConfirmation',
+      'orderId': '145667',
+      'orderSubtotal': 10,
+      'orderShip': 10,
+      'orderTax': 5.99,
+      'orderDiscount': '10%',
+      'currency': 'USD',
+    });
+
+    // Get a boolean config value
+    // PluginConnect.getBooleanConfigItemForKey('myFeatureEnabled', 'Tealeaf');
+    // // Get a string config value with a default value
+    // PluginConnect.getStringItemForKey('PostMessageUrl', 'Tealeaf', defaultValue: 'https://default.com');
+    // // Set a config value
+    // PluginConnect.setConfigItem('key', 'value', 'Tealeaf');
+
     return ModelBinding(
       initialModel: GalleryOptions(
         themeMode: ThemeMode.system,
@@ -128,4 +149,45 @@ class RootPage extends StatelessWidget {
       ),
     );
   }
+}
+
+///
+/// Sample Plugin API calls to config. SDK items
+/// 
+/// Update according to specific SDK configurable properties, and module name
+///
+Future<void> _loadConfigItems() async {
+  // Get boolean config item
+  final isEnabled =
+      await PluginConnect.getBooleanConfigItemForKey('isEnabled', 'Tealeaf');
+  tlLogger.d('PluginConnect getBooleanConfigItemForKey: $isEnabled');
+
+  // Get string config item with default value
+  final serverUrl = await PluginConnect.getStringItemForKey(
+      'AppKey', 'Tealeaf',
+      defaultValue: 'https://default.server.com');
+  tlLogger.d('PluginConnect getStringItemForKey: $serverUrl');
+
+  // Get number config item with default value
+  final maxRetries = await PluginConnect.getNumberItemForKey(
+      'maxRetries', 'Tealeaf',
+      defaultValue: 3);
+  tlLogger.d('PluginConnect getNumberItemForKey: $maxRetries');
+
+  // Set boolean config item
+  final success1 = await PluginConnect.setBooleanConfigItemForKey(
+      'isEnabled', true, 'Tealeaf');
+  tlLogger.d('PluginConnect setBooleanConfigItemForKey: $success1');
+
+  // Set string config item
+  final newServerUrl = await PluginConnect.setStringItemForKey(
+      'serverUrl', 'https://new.server.com', 'Tealeaf');
+  tlLogger.d('PluginConnect setBooleanConfigItemForKey: $newServerUrl');
+
+  // Set number config item
+  final newMaxRetries =
+      await PluginConnect.setNumberItemForKey('maxRetries', 5, 'Tealeaf');
+  tlLogger.d('PluginConnect setNumberItemForKey: $newMaxRetries');
+
+  // ... use the retrieved and updated config values
 }

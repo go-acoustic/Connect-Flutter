@@ -41,7 +41,7 @@ A new flutter plugin project uses native SDKs and Flutter code to capture user e
   s.homepage         = pubspec["homepage"] # Homepage from pubspec.yaml
   s.license          = { :file => '../LICENSE' } # License file location
   s.author           = { 'Your Company' => 'email@example.com' }
-  s.platform         = :ios, '12.0' # iOS platform version
+  s.platform         = :ios, '13.0' # iOS platform version
   
   # Source configuration with dynamic version tag
   # s.source           = { :git => repository, :tag => s.version }

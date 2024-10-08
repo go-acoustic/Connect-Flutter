@@ -114,7 +114,8 @@ class Connect extends StatelessWidget {
             ConnectHelper.pointerEventHelper("DOWN", details);
           },
           onPointerMove: (details) {
-            tlLogger.v("Gesture move, swipe event checkForScroll() will fire..");
+            tlLogger
+                .v("Gesture move, swipe event checkForScroll() will fire..");
             ConnectHelper.pointerEventHelper("MOVE", details);
           },
           child: child,
@@ -406,9 +407,7 @@ Future<List<Map<String, dynamic>>> parseWidgetTree(Element element) async {
               // ignore: unnecessary_null_comparison
               'tlType': (image != null)
                   ? 'image'
-                  : (text!.contains('\n')
-                      ? 'textArea'
-                      : 'label'),
+                  : (text!.contains('\n') ? 'textArea' : 'label'),
               'type': type,
               'subType': widget.runtimeType.toString(),
               'position': <String, String>{
@@ -922,22 +921,116 @@ class PluginConnect {
         throw ArgumentError("loadEventEnd must be positive");
       }
 
-      return await _channel.invokeMethod('logPerformanceEvent',
-          <dynamic, dynamic>{
-            'navigationType': navigationType.toString(),
-            'redirectCount': redirectCount.toString(),
-            'navigationStart': navigationStart.toString(),
-            'unloadEventStart': unloadEventStart.toString(),
-            'unloadEventEnd': unloadEventEnd.toString(),
-            'redirectStart': redirectStart.toString(),
-            'redirectEnd': redirectEnd.toString(),
-            'loadEventStart': loadEventStart.toString(),
-            'loadEventEnd': loadEventEnd.toString()
-          });
+      return await _channel
+          .invokeMethod('logPerformanceEvent', <dynamic, dynamic>{
+        'navigationType': navigationType.toString(),
+        'redirectCount': redirectCount.toString(),
+        'navigationStart': navigationStart.toString(),
+        'unloadEventStart': unloadEventStart.toString(),
+        'unloadEventEnd': unloadEventEnd.toString(),
+        'redirectStart': redirectStart.toString(),
+        'redirectEnd': redirectEnd.toString(),
+        'loadEventStart': loadEventStart.toString(),
+        'loadEventEnd': loadEventEnd.toString()
+      });
     } on PlatformException catch (pe) {
-      throw ConnectException(
-          pe, msg: 'Unable to process log performance event message!');
+      throw ConnectException(pe,
+          msg: 'Unable to process log performance event message!');
     }
+  }
+
+  /// Emits a signal with the given data.
+  ///
+  /// [customData]: A map containing custom data to be logged.
+  /// [logLevel]: The severity level of the log message. Defaults to [LogLevel.info].
+  ///
+  /// Example usage:
+  ///
+  /// ```dart
+  /// PluginConnect.logSignal({
+  ///   "behaviorType": "orderConfirmation",
+  ///   "orderId": "145667",
+  ///   "orderSubtotal": 10,
+  ///   "orderShip": 10,
+  ///   "orderTax": 5.99,
+  ///   "orderDiscount": "10%",
+  ///   "currency": "USD",
+  /// });
+  /// ```
+  static Future<void> logSignal(
+      {required Map<String, dynamic> signalData, int? logLevel}) async {
+    try {
+      await _channel.invokeMethod('logSignal', {
+        'loglevel': logLevel,
+        'data': signalData,
+      });
+    } on PlatformException catch (pe) {
+      throw ConnectException(pe, msg: 'Unable to process logSignal message.');
+    }
+  }
+
+  /// Gets a boolean configuration item for the specified key.
+  ///
+  /// [key] The configuration key.
+  /// [moduleName] The name of the module.
+  static Future<bool> getBooleanConfigItemForKey(
+      String key, String moduleName) async {
+    return await _channel.invokeMethod(
+        'getBooleanConfigItemForKey', {'key': key, 'moduleName': moduleName});
+  }
+
+  /// Gets a string configuration item for the specified key.
+  ///
+  /// [key] The configuration key.
+  /// [moduleName] The name of the module.
+  /// [defaultValue] The default value to return if the key is not found.
+  static Future<String?> getStringItemForKey(String key, String moduleName,
+      {String? defaultValue}) async {
+    return await _channel.invokeMethod('getStringItemForKey',
+        {'key': key, 'moduleName': moduleName, 'theDefault': defaultValue});
+  }
+
+  /// Gets a number configuration item for the specified key.
+  ///
+  /// [key] The configuration key.
+  /// [moduleName] The name of the module.
+  /// [defaultValue] The default value to return if the key is not found.
+  static Future<int?> getNumberItemForKey(String key, String moduleName,
+      {int defaultValue = 0}) async {
+    return await _channel.invokeMethod('getNumberItemForKey',
+        {'key': key, 'moduleName': moduleName, 'theDefault': defaultValue});
+  }
+
+  /// Sets a boolean configuration item for the specified key.
+  ///
+  /// [key] The configuration key.
+  /// [value] The configuration value.
+  /// [moduleName] The name of the module.
+  static Future<bool> setBooleanConfigItemForKey(
+      String key, bool value, String moduleName) async {
+    return await _channel.invokeMethod(
+        'setBooleanConfigItemForKey', {'key': key, 'value': value, 'moduleName': moduleName});
+  }
+
+  /// Sets a string configuration item for the specified key.
+  ///
+  /// [key] The configuration key.
+  /// [value] The configuration value.
+  /// [moduleName] The name of the module.
+  static Future<dynamic> setStringItemForKey(String key, String value, String moduleName) async {
+    return await _channel.invokeMethod('setStringItemForKey',
+        {'key': key, 'value': value, 'moduleName': moduleName});
+  }
+
+  /// Sets a number configuration item for the specified key.
+  ///
+  /// [key] The configuration key.
+  /// [value] The configuration value.
+  /// [moduleName] The name of the module.
+  /// [defaultValue] The default value to return if the key is not found.
+  static Future<dynamic> setNumberItemForKey(String key, num value, String moduleName) async {
+    return await _channel.invokeMethod('setNumberItemForKey',
+        {'key': key, 'value': value, 'moduleName': moduleName});
   }
 }
 

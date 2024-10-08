@@ -441,7 +441,7 @@
  * @remarks This method logs the layout of the screen by capturing the current view controller and sending it to the Connect framework for recording. If the delay is greater than 0, it waits for the specified duration before logging the view.
  * This method should be called from the main thread.
  */
-- (void) logScreenLayout: (NSDictionary *) args {
+- (void) tlLogScreenLayout: (NSDictionary *) args {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIViewController *uv = [UIApplication sharedApplication].keyWindow.rootViewController;
         while (uv.presentedViewController) {
@@ -475,7 +475,7 @@
  * 'name' is the logical name of the current page.
  * 'referrer' is the source that led the user to this page.
  */
-- (void) logScreenViewContextUnload: (NSDictionary *) args {
+- (void) tlLogScreenViewContextUnload: (NSDictionary *) args {
         // Checking for 'name' parameter in the args, which is supposed to be the logical name of the current page
         NSString *logicalPageName =  (NSString *) [self checkForParameter:args withKey:@"name"];
         // Checking for 'referrer' parameter in the args, which is supposed to be the source that led the user to this page
@@ -710,6 +710,19 @@
     else {
         kConnectMonitoringLevelType level = (kConnectMonitoringLevelType) [logLevel intValue];
         [[ConnectCustomEvent sharedInstance] logEvent:eventName values:data level:level];
+    }
+}
+
+- (void) tlLogSignal: (NSDictionary *) args {
+    NSDictionary *data  = (NSDictionary *)[self checkForParameter:args withKey:@"data"];
+    NSNumber *logLevel  = args[@"loglevel"];
+    
+    if (logLevel == (NSNumber *) [NSNull null]) {
+        [[ConnectCustomEvent sharedInstance] logSignal:data];
+    }
+    else {
+        kConnectMonitoringLevelType level = (kConnectMonitoringLevelType) [logLevel intValue];
+        [[ConnectCustomEvent sharedInstance] logSignal:data level:level];
     }
 }
 
@@ -1035,7 +1048,7 @@ NSString *processString(NSString *inputString) {
     }
 }
 
-- (BOOL) logPerformanceEvent: (NSDictionary *) args {
+- (BOOL) tlLogPerformanceEvent: (NSDictionary *) args {
     NSString *type = @"NAVIGATE";
     long redirectCount = [self checkParameterStringAsInteger:args withKey:@"redirectCount"];
     long navigationStart = [self checkParameterStringAsInteger:args withKey:@"navigationStart"];
@@ -1123,11 +1136,11 @@ NSString *processString(NSString *inputString) {
             result(nil);
         }
         else if ([@"logScreenLayout" caseInsensitiveCompare:call.method] == NSOrderedSame) {
-            [self logScreenLayout:call.arguments];
+            [self tlLogScreenLayout:call.arguments];
             result(nil);
         }
         else if ([@"logScreenViewContextUnload" caseInsensitiveCompare:call.method] == NSOrderedSame) {
-            [self logScreenViewContextUnload:call.arguments];
+            [self tlLogScreenViewContextUnload:call.arguments];
             result(nil);
         }
         else if ([@"exception" caseInsensitiveCompare:call.method] == NSOrderedSame) {
@@ -1142,12 +1155,34 @@ NSString *processString(NSString *inputString) {
             [self tlCustomEvent:call.arguments];
             result(nil);
         }
+        else if ([@"logSignal" caseInsensitiveCompare:call.method] == NSOrderedSame) {
+            [self tlLogSignal:call.arguments];
+            result(nil);
+        }
         else if ([@"focuschanged" caseInsensitiveCompare:call.method] == NSOrderedSame) {
             [self tlFocusChanged:call.arguments];
             result(nil);
         }
         else if ([@"logPerformanceEvent" caseInsensitiveCompare:call.method] == NSOrderedSame) {
-            result(@([self logPerformanceEvent:call.arguments]));
+            result(@([self tlLogPerformanceEvent:call.arguments]));
+        }
+        else if ([@"setBooleanConfigItemForKey" caseInsensitiveCompare:call.method] == NSOrderedSame) {
+            [self tlSetBooleanConfigItemForKey:call result:result];
+        }
+        else if ([@"setStringItemForKey" caseInsensitiveCompare:call.method] == NSOrderedSame) {
+            [self tlSetStringItemForKey:call result:result];
+        }
+        else if ([@"setNumberItemForKey" caseInsensitiveCompare:call.method] == NSOrderedSame) {
+            [self tlSetNumberItemForKey:call result:result];
+        }
+        else if ([@"getBooleanConfigItemForKey" caseInsensitiveCompare:call.method] == NSOrderedSame) {
+            [self tlGetBooleanConfigItemForKey:call result:result];
+        }
+        else if ([@"getStringItemForKey" caseInsensitiveCompare:call.method] == NSOrderedSame) {
+            [self tlGetStringItemForKey:call result:result];
+        }
+        else if ([@"getNumberItemForKey" caseInsensitiveCompare:call.method] == NSOrderedSame) {
+            [self tlGetNumberItemForKey:call result:result];
         }
         else {
             result(FlutterMethodNotImplemented);
@@ -1164,6 +1199,64 @@ NSString *processString(NSString *inputString) {
     @finally {
         NSLog(@"MethodChannel handler, method: %@, args: %@", call.method, [call.arguments description]);
     }
+}
+
+- (void)tlSetBooleanConfigItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
+    id value = call.arguments[@"value"];
+    NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
+    moduleName = [self testModuleName:moduleName];
+    BOOL success = [[EOApplicationHelper sharedInstance] setConfigItem:key value:value forModuleName:moduleName];
+    result(@(success));
+}
+
+- (void)tlSetStringItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
+    id value = call.arguments[@"value"];
+    NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
+    moduleName = [self testModuleName:moduleName];
+    BOOL success = [[EOApplicationHelper sharedInstance] setConfigItem:key value:value forModuleName:moduleName];
+    result(@(success));
+}
+
+- (void)tlSetNumberItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
+    id value = call.arguments[@"value"];
+    NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
+    moduleName = [self testModuleName:moduleName];
+    BOOL success = [[EOApplicationHelper sharedInstance] setConfigItem:key value:value forModuleName:moduleName];
+    result(@(success));
+}
+
+- (void)tlGetBooleanConfigItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
+    NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
+    moduleName = [self testModuleName:moduleName];
+    BOOL boolValue = [[EOApplicationHelper sharedInstance] getBOOLconfigItemForKey:key withDefault:NO forModuleName:moduleName];
+    result(@(boolValue));
+}
+
+- (void)tlGetStringItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
+    NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
+    moduleName = [self testModuleName:moduleName];
+    NSString *stringValue = [[EOApplicationHelper sharedInstance] getStringItemForKey:key withDefault:nil forModuleName:moduleName];
+    result(stringValue);
+}
+
+- (void)tlGetNumberItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
+    NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
+    moduleName = [self testModuleName:moduleName];
+    NSNumber *numberValue = [[EOApplicationHelper sharedInstance] getNumberItemForKey:key withDefault:nil forModuleName:moduleName];
+    result(numberValue);
+}
+
+- (NSString*)testModuleName:(NSString*)moduleName {
+    if ([moduleName caseInsensitiveCompare:@"Tealeaf"] == NSOrderedSame) {
+        return moduleName = @"TLFCoreModule";
+    }
+    return moduleName;
 }
 
 @end
