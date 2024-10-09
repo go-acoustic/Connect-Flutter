@@ -3,7 +3,7 @@ PODS:
     - AcousticConnectDebug/Core (= 1.0.30)
   - AcousticConnectDebug/Core (1.0.30):
     - TealeafDebug
-  - connect_flutter_plugin (2.32.1-beta):
+  - connect_flutter_plugin (2.32.2-beta):
     - AcousticConnectDebug
     - Flutter
   - EOCoreDebug (2.3.289)
@@ -186,7 +186,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AcousticConnectDebug: fea9049940c5405ebedbc393fc3103afcab081a5
-  connect_flutter_plugin: 593bf2a02dbb9966a3507633cbb3b3ae8b8c3a40
+  connect_flutter_plugin: b55252c0829e47c79be1f2ac4ffdf0101c84b1e1
   EOCoreDebug: 3e6fc19a94152a82d0ede3546a5bce8a5c8ae5cb
   Firebase: 98e6bf5278170668a7983e12971a66b2cd57fc8c
   firebase_core: 2bedc3136ec7c7b8561c6123ed0239387b53f2af
