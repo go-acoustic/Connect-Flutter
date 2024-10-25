@@ -223,7 +223,7 @@ class _SplashBackLayer extends StatelessWidget {
       }
       if (isDisplayFoldable(context)) {
         child = Container(
-          color: Theme.of(context).colorScheme.background,
+          color: Theme.of(context).colorScheme.surface,
           child: Stack(
             children: [
               Center(

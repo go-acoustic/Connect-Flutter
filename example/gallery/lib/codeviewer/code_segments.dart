@@ -825,7 +825,7 @@ class CodeSegments {
       TextSpan(style: codeStyle.punctuationStyle, text: ':'),
       TextSpan(style: codeStyle.baseStyle, text: ' colorScheme'),
       TextSpan(style: codeStyle.punctuationStyle, text: '.'),
-      TextSpan(style: codeStyle.baseStyle, text: 'background'),
+      TextSpan(style: codeStyle.baseStyle, text: 'surface'),
       TextSpan(style: codeStyle.punctuationStyle, text: ','),
       TextSpan(style: codeStyle.baseStyle, text: '\u000a    '),
       TextSpan(style: codeStyle.punctuationStyle, text: ');'),

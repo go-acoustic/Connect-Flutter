@@ -185,7 +185,7 @@ class _CategoryHeader extends StatelessWidget {
       margin: margin,
       child: Material(
         shape: RoundedRectangleBorder(borderRadius: borderRadius),
-        color: colorScheme.onBackground,
+        color: colorScheme.onSurface,
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
@@ -330,7 +330,7 @@ class CategoryDemoItem extends StatelessWidget {
                       Divider(
                         thickness: 1,
                         height: 1,
-                        color: Theme.of(context).colorScheme.background,
+                        color: Theme.of(context).colorScheme.surface,
                       ),
                     ],
                   ),

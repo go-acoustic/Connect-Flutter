@@ -45,7 +45,7 @@ void main() async {
   }
 
   ///
-  /// Add Tealeaf Wrapper for auto instrumentation
+  /// Add Connect Wrapper for auto instrumentation
   ///
   runApp(Connect(child: const GalleryApp()));
 
@@ -65,24 +65,6 @@ class GalleryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Connect logSignal API sample
-    PluginConnect.logSignal(signalData: {
-      'behaviorType': 'orderConfirmation',
-      'orderId': '145667',
-      'orderSubtotal': 10,
-      'orderShip': 10,
-      'orderTax': 5.99,
-      'orderDiscount': '10%',
-      'currency': 'USD',
-    });
-
-    // Get a boolean config value
-    // PluginConnect.getBooleanConfigItemForKey('myFeatureEnabled', 'Tealeaf');
-    // // Get a string config value with a default value
-    // PluginConnect.getStringItemForKey('PostMessageUrl', 'Tealeaf', defaultValue: 'https://default.com');
-    // // Set a config value
-    // PluginConnect.setConfigItem('key', 'value', 'Tealeaf');
-
     return ModelBinding(
       initialModel: GalleryOptions(
         themeMode: ThemeMode.system,
@@ -99,7 +81,7 @@ class GalleryApp extends StatelessWidget {
           final hasHinge = MediaQuery.of(context).hinge?.bounds != null;
           return MaterialApp(
             ///
-            /// Add the required Tealeaf loggingNavigatorObserver to the navigatorObservers list
+            /// Add the required Connect loggingNavigatorObserver to the navigatorObservers list
             ///
             navigatorObservers: [Connect.loggingNavigatorObserver],
             // showSemanticsDebugger: true,
@@ -153,7 +135,7 @@ class RootPage extends StatelessWidget {
 
 ///
 /// Sample Plugin API calls to config. SDK items
-/// 
+///
 /// Update according to specific SDK configurable properties, and module name
 ///
 Future<void> _loadConfigItems() async {
@@ -164,7 +146,7 @@ Future<void> _loadConfigItems() async {
 
   // Get string config item with default value
   final serverUrl = await PluginConnect.getStringItemForKey(
-      'AppKey', 'Tealeaf',
+      'PostMessageURL', 'Tealeaf',
       defaultValue: 'https://default.server.com');
   tlLogger.d('PluginConnect getStringItemForKey: $serverUrl');
 
@@ -189,5 +171,14 @@ Future<void> _loadConfigItems() async {
       await PluginConnect.setNumberItemForKey('maxRetries', 5, 'Tealeaf');
   tlLogger.d('PluginConnect setNumberItemForKey: $newMaxRetries');
 
-  // ... use the retrieved and updated config values
+  // Connect logSignal API sample
+  await PluginConnect.logSignal(signalData: {
+    'behaviorType': 'orderConfirmation',
+    'orderId': '145667',
+    'orderSubtotal': 10,
+    'orderShip': 10,
+    'orderTax': 5.99,
+    'orderDiscount': '10%',
+    'currency': 'USD',
+  });
 }

@@ -24,6 +24,30 @@
           "Shrine - Connect masking label"
         ]
       }
+    },
+    "EnabledScreen": {
+      "ScreenChange": true,
+      "DisplayName": "My Home Screen",
+      "Masking": {
+        "HasMasking": true,
+        "HasCustomMask": true,
+        "Sensitive": {
+          "capitalCaseAlphabet": "X",
+          "number": "9",
+          "smallCaseAlphabet": "x",
+          "symbol": "#"
+        },
+        "MaskAccessibilityLabelList": [
+          "privacyLabel",
+          "emailLabel"
+        ]
+      }
+    },
+    "DisabledScreen": {
+      "ScreenChange": false
+    },
+    "/reply": {
+      "ScreenChange": false
     }
   },
   "AppendMapIds": {

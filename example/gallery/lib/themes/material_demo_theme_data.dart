@@ -8,13 +8,13 @@ import 'package:flutter/material.dart';
 class MaterialDemoThemeData {
   static final themeData = ThemeData(
       colorScheme: _colorScheme.copyWith(
-        background: Colors.white,
+        surface: Colors.white,
       ),
-      canvasColor: _colorScheme.background,
+      canvasColor: _colorScheme.surface,
       highlightColor: Colors.transparent,
       indicatorColor: _colorScheme.onPrimary,
-      scaffoldBackgroundColor: _colorScheme.background,
-      secondaryHeaderColor: _colorScheme.background,
+      scaffoldBackgroundColor: _colorScheme.surface,
+      secondaryHeaderColor: _colorScheme.surface,
       typography: Typography.material2018(
         platform: defaultTargetPlatform,
       ),
@@ -28,21 +28,21 @@ class MaterialDemoThemeData {
         color: _colorScheme.primary,
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
-          if (states.contains(MaterialState.disabled)) {
+        fillColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
             return null;
           }
-          return states.contains(MaterialState.selected)
+          return states.contains(WidgetState.selected)
               ? _colorScheme.primary
               : null;
         }),
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
-          if (states.contains(MaterialState.disabled)) {
+        fillColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
             return null;
           }
-          return states.contains(MaterialState.selected)
+          return states.contains(WidgetState.selected)
               ? _colorScheme.primary
               : null;
         }),
@@ -51,19 +51,19 @@ class MaterialDemoThemeData {
         behavior: SnackBarBehavior.floating,
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith<Color?>((states) {
-          if (states.contains(MaterialState.disabled)) {
+        thumbColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
             return null;
           }
-          return states.contains(MaterialState.selected)
+          return states.contains(WidgetState.selected)
               ? _colorScheme.primary
               : null;
         }),
-        trackColor: MaterialStateProperty.resolveWith<Color?>((states) {
-          if (states.contains(MaterialState.disabled)) {
+        trackColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
             return null;
           }
-          return states.contains(MaterialState.selected)
+          return states.contains(WidgetState.selected)
               ? _colorScheme.primary.withAlpha(0x80)
               : null;
         }),
@@ -74,9 +74,7 @@ class MaterialDemoThemeData {
     primaryContainer: Color(0xFF6200EE),
     secondary: Color(0xFFFF5722),
     secondaryContainer: Color(0xFFFF5722),
-    background: Colors.white,
     surface: Color(0xFFF2F2F2),
-    onBackground: Colors.black,
     onSurface: Colors.black,
     error: Colors.red,
     onError: Colors.white,

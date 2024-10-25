@@ -115,10 +115,10 @@ updateConnectLayoutConfig(BasicConfig basicConfig, String currentProjectDir) {
           oldiOSFile.deleteSync();
         }
 
-        File(iosDebugPath).create(recursive: true).then((File file) {
-          file.writeAsString(prettyprint);
-          stdout.writeln('Updated iOS ConnectLayoutConfig.json');
-        });
+        File iosFile = File(iosDebugPath);
+        iosFile.createSync(recursive: true);
+        iosFile.writeAsStringSync(prettyprint);
+        stdout.writeln('Updated iOS ConnectLayoutConfig.json (Debug)');
       } else {
         stdout.writeln('useRelease property not found');
       }
@@ -128,6 +128,17 @@ updateConnectLayoutConfig(BasicConfig basicConfig, String currentProjectDir) {
   } else {
     stdout.writeln("Issue with ConnectConfig.json");
   }
+}
+
+void updateFile(String iosDebugPath, String prettyprint) async {
+  // Create the file and ensure it's done before proceeding
+  File file = await File(iosDebugPath).create(recursive: true);
+
+  // Write the string to the file
+  await file.writeAsString(prettyprint);
+
+  // Confirm the update
+  stdout.writeln('Updated iOS ConnectLayoutConfig.json');
 }
 
 updateBasicConfig(

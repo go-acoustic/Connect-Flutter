@@ -1,4 +1,5 @@
 import 'package:connect_flutter_plugin/connect_flutter_plugin.dart';
+import 'package:connect_flutter_plugin/connect_flutter_plugin_helper.dart';
 import 'package:connect_flutter_plugin/tl_http_request_data.dart';
 import 'package:connect_flutter_plugin/tl_http_response_data.dart';
 
@@ -23,12 +24,14 @@ class TlHttpLogger {
     mResponseSize = data.contentLength ?? 0;
     mLoadTime = DateTime.now().millisecondsSinceEpoch;
 
-    PluginConnect.tlConnection(
-        url: mUrl,
-        description: mDescription,
-        statusCode: mStatusCode,
-        responseSize: mResponseSize,
-        initTime: mInitTime,
-        loadTime: mLoadTime);
+    if (ConnectHelper.captureScreen){
+      PluginConnect.tlConnection(
+          url: mUrl,
+          description: mDescription,
+          statusCode: mStatusCode,
+          responseSize: mResponseSize,
+          initTime: mInitTime,
+          loadTime: mLoadTime);
+    }
   }
 }

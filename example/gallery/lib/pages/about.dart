@@ -43,7 +43,7 @@ class _AboutDialog extends StatelessWidget {
     final seeSourceSecond = seeSource.substring(repoLinkIndexEnd);
 
     return AlertDialog(
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       content: Container(
         constraints: const BoxConstraints(maxWidth: 400),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:connect_flutter_plugin/connect_flutter_plugin.dart';
+import 'package:connect_flutter_plugin/connect_flutter_plugin_helper.dart';
 
 class TlTextFieldListener {
   static void setupFocusListener(GlobalKey widgetKey, bool focused){
@@ -30,6 +31,8 @@ class TlTextFieldListener {
     double x = globalPosition.dx;
     double y = globalPosition.dy;
 
-    PluginConnect.tlFocusChanged(widgetId, x, y, focused);
+    if (ConnectHelper.captureScreen){
+      PluginConnect.tlFocusChanged(widgetId, x, y, focused);
+    }
   }
 }

@@ -1240,8 +1240,29 @@ NSString *processString(NSString *inputString) {
     NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
     NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
     moduleName = [self testModuleName:moduleName];
+
     NSString *stringValue = [[EOApplicationHelper sharedInstance] getStringItemForKey:key withDefault:nil forModuleName:moduleName];
-    result(stringValue);
+    if (stringValue == nil) {
+        EOApplicationHelper *helper = [EOApplicationHelper sharedInstance];
+        id configValue = [helper getConfigItem:key forModuleName:moduleName];
+        
+        if ([NSJSONSerialization isValidJSONObject:configValue]) {
+            NSError *error;
+            NSData *jsonData = [NSJSONSerialization dataWithJSONObject:configValue
+                                                               options:NSJSONWritingWithoutEscapingSlashes
+                                                                 error:&error];
+            if (!error) {
+                NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+                NSLog(@"JSON as String: %@", jsonString);
+                result(jsonString);
+            } else {
+                NSLog(@"Error converting to JSON string: %@", error.localizedDescription);
+                result(@"");
+            }
+        }
+    } else {
+        result(stringValue);
+    }
 }
 
 - (void)tlGetNumberItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {

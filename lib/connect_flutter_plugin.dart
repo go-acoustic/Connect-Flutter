@@ -93,21 +93,23 @@ class Connect extends StatelessWidget {
               // Start time as reference when there's navigation change
               Connect.startTime = DateTime.now().millisecondsSinceEpoch;
 
-              logWidgetTree().then((result) async {
-                var touchedTarget =
-                    findTouchedWidget(context, details.position);
+              if (ConnectHelper.captureScreen) {
+                logWidgetTree().then((result) async {
+                  var touchedTarget =
+                      findTouchedWidget(context, details.position);
 
-                // Handle onTap gesture and Pass the result to Connect plugin
-                await PluginConnect.onTlGestureEvent(
-                    gesture: "tap",
-                    id: wp.widgetPath(),
-                    target: touchedTarget,
-                    data: null,
-                    layoutParameters: result);
-              }).catchError((error) {
-                // Handle errors if the async function throws an error
-                tlLogger.e('Error: $error');
-              });
+                  // Handle onTap gesture and Pass the result to Connect plugin
+                  await PluginConnect.onTlGestureEvent(
+                      gesture: "tap",
+                      id: wp.widgetPath(),
+                      target: touchedTarget,
+                      data: null,
+                      layoutParameters: result);
+                }).catchError((error) {
+                  // Handle errors if the async function throws an error
+                  tlLogger.e('Error: $error');
+                });
+              }
             }
           },
           onPointerDown: (details) {
@@ -195,11 +197,23 @@ class LoggingNavigatorObserver extends NavigatorObserver {
       final endTime = DateTime.now().millisecondsSinceEpoch;
       final int duration = endTime - Connect.startTime;
 
-      /// Calls Connect plugin
-      PluginConnect.logScreenLayout(route.settings.name.toString());
+      final logicalPageName = route.settings.name.toString();
+      ConnectHelper.currentLogicalPageName = logicalPageName;
 
-      tlLogger
-          .v('PluginConnect.logScreenLayout - Pushed ${route.settings.name}');
+      // Load AutoLayout JSON configuration
+      final jsonString =
+          PluginConnect.getStringItemForKey('AutoLayout', 'Tealeaf');
+      // tlLogger.d('PluginConnect getStringItemForKey: $jsonString');
+      jsonString.then((result) {
+        if (result != null && ConnectHelper.canCaptureScreen(logicalPageName, result)) {
+          /// Calls Connect plugin to log the screen layout
+          PluginConnect.logScreenLayout(logicalPageName);
+          tlLogger.v(
+              'PluginConnect.logScreenLayout - Pushed ${route.settings.name}');
+        }
+      }).catchError((error) {
+        tlLogger.e('Error: $error');
+      });
 
       PluginConnect.logPerformanceEvent(
         loadEventStart: 0,
@@ -960,6 +974,10 @@ class PluginConnect {
   static Future<void> logSignal(
       {required Map<String, dynamic> signalData, int? logLevel}) async {
     try {
+      if (!ConnectHelper.captureScreen) {
+        return;
+      }
+
       await _channel.invokeMethod('logSignal', {
         'loglevel': logLevel,
         'data': signalData,
@@ -1008,8 +1026,8 @@ class PluginConnect {
   /// [moduleName] The name of the module.
   static Future<bool> setBooleanConfigItemForKey(
       String key, bool value, String moduleName) async {
-    return await _channel.invokeMethod(
-        'setBooleanConfigItemForKey', {'key': key, 'value': value, 'moduleName': moduleName});
+    return await _channel.invokeMethod('setBooleanConfigItemForKey',
+        {'key': key, 'value': value, 'moduleName': moduleName});
   }
 
   /// Sets a string configuration item for the specified key.
@@ -1017,7 +1035,8 @@ class PluginConnect {
   /// [key] The configuration key.
   /// [value] The configuration value.
   /// [moduleName] The name of the module.
-  static Future<dynamic> setStringItemForKey(String key, String value, String moduleName) async {
+  static Future<dynamic> setStringItemForKey(
+      String key, String value, String moduleName) async {
     return await _channel.invokeMethod('setStringItemForKey',
         {'key': key, 'value': value, 'moduleName': moduleName});
   }
@@ -1028,7 +1047,8 @@ class PluginConnect {
   /// [value] The configuration value.
   /// [moduleName] The name of the module.
   /// [defaultValue] The default value to return if the key is not found.
-  static Future<dynamic> setNumberItemForKey(String key, num value, String moduleName) async {
+  static Future<dynamic> setNumberItemForKey(
+      String key, num value, String moduleName) async {
     return await _channel.invokeMethod('setNumberItemForKey',
         {'key': key, 'value': value, 'moduleName': moduleName});
   }

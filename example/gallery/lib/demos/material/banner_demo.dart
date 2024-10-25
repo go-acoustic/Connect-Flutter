@@ -94,7 +94,7 @@ class _BannerDemoState extends State<BannerDemo> with RestorationMixin {
             child: Text(localizations.dismiss),
           ),
       ],
-      backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.surface,
     );
 
     return Scaffold(

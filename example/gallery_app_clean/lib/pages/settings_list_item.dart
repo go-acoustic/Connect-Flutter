@@ -212,7 +212,7 @@ class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
           border: BorderDirectional(
             start: BorderSide(
               width: 2,
-              color: theme.colorScheme.background,
+              color: theme.colorScheme.surface,
             ),
           ),
         ),

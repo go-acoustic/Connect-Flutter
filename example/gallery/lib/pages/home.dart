@@ -582,7 +582,7 @@ class _DesktopCategoryHeader extends StatelessWidget {
     return Material(
       // Makes integration tests possible.
       key: ValueKey('${category.name}CategoryHeader'),
-      color: colorScheme.onBackground,
+      color: colorScheme.onSurface,
       child: Row(
         children: [
           Padding(

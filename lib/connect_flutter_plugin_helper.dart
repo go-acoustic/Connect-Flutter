@@ -44,7 +44,7 @@ class WidgetPath {
     } catch (e) {
       result = -1;
     }
-    
+
     return result;
   }
 
@@ -323,28 +323,32 @@ class TlBinder extends WidgetsBindingObserver {
         logWidgetTree().then((result) async {
           // TODO: missing context?
           // var touchedTarget = findTouchedWidget(context, details.position);
-          await PluginConnect.onTlGestureEvent(
-              gesture: 'swipe',
-              id: '../Scrollable',
-              target: 'Scrollable',
-              data: <String, dynamic>{
-                'pointer1': {
-                  'dx': start?.dx,
-                  'dy': start?.dy,
-                  'ts': swipe.getStartTimestampString()
+
+          if (ConnectHelper.captureScreen) {
+            await PluginConnect.onTlGestureEvent(
+                gesture: 'swipe',
+                id: '../Scrollable',
+                target: 'Scrollable',
+                data: <String, dynamic>{
+                  'pointer1': {
+                    'dx': start?.dx,
+                    'dy': start?.dy,
+                    'ts': swipe.getStartTimestampString()
+                  },
+                  'pointer2': {
+                    'dx': end?.dx,
+                    'dy': end?.dy,
+                    'ts': swipe.getUpdateTimestampString()
+                  },
+                  'velocity': {
+                    'dx': velocity?.pixelsPerSecond.dx,
+                    'dy': velocity?.pixelsPerSecond.dy
+                  },
+                  'direction': direction,
                 },
-                'pointer2': {
-                  'dx': end?.dx,
-                  'dy': end?.dy,
-                  'ts': swipe.getUpdateTimestampString()
-                },
-                'velocity': {
-                  'dx': velocity?.pixelsPerSecond.dx,
-                  'dy': velocity?.pixelsPerSecond.dy
-                },
-                'direction': direction,
-              },
-              layoutParameters: result);
+                layoutParameters: result);
+          }
+
         }).catchError((error) {
           // Handle errors if the async function throws an error
           tlLogger.e('Error: $error');
@@ -394,7 +398,7 @@ class TlBinder extends WidgetsBindingObserver {
     }
     return maskingEnabled;
   }
-  
+
   //  TODO:  Is this required?  not sure if tlSetEnvironment is necessary since the plugin could get the info
   void logFrameIfChanged(WidgetsBinding binding, Duration timestamp) async {
     // ignore: deprecated_member_use
@@ -666,7 +670,7 @@ class TlBinder extends WidgetsBindingObserver {
           if (subType.compareTo("TextField") == 0) {
             var textField = widget as TextField;
             var controller = textField.controller;
-            controller?.addListener(() { });
+            controller?.addListener(() {});
           }
 
           aStyle = {
@@ -809,7 +813,7 @@ class _Swipe {
 }
 
 /// Represents an accessible position with information about its ID, label, hint, and position coordinates.
-/// 
+///
 class AccessiblePosition {
   final double dx;
   final double dy;
@@ -847,7 +851,7 @@ class AccessiblePosition {
 }
 
 ///
-/// Tealeaf static helper methods
+/// Connect static helper methods
 ///
 class ConnectHelper {
   ConnectHelper();
@@ -868,7 +872,8 @@ class ConnectHelper {
   // static const String _onHorizontalDragStart = "onHorizontalDragStart";
   // static const String _onHorizontalDragUpdate = "onHorizontalDragUpdate";
   // static const String _onHorizontalDragEnd = "onHorizontalDragEnd";
-
+  static bool captureScreen = true;
+  static String currentLogicalPageName = "";
 
   static Map<String, dynamic> checkForSemantics(WidgetPath? wp) {
     final BuildContext? context = wp!.context;
@@ -930,12 +935,14 @@ class ConnectHelper {
           '${gestureType!.toUpperCase()}: Gesture widget, context hash: ${context.hashCode}, widget hash: $hashCode');
       tlLogger.v('--> Path: ${wp.widgetPath()}, digest: ${wp.widgetDigest()}');
 
-      await PluginConnect.onTlGestureEvent(
-          gesture: gestureType,
-          id: wp.widgetPath(),
-          target: gestureTarget,
-          data: accessibility.isNotEmpty ? accessibility : null,
-          layoutParameters: TlBinder.layoutParametersForGestures);
+      if (ConnectHelper.captureScreen) {
+        await PluginConnect.onTlGestureEvent(
+            gesture: gestureType,
+            id: wp.widgetPath(),
+            target: gestureTarget,
+            data: accessibility.isNotEmpty ? accessibility : null,
+            layoutParameters: TlBinder.layoutParametersForGestures);
+      }
     } else {
       tlLogger.v(
           "ERROR: ${gesture.runtimeType.toString()} gesture not found for hashcode: $hashCode");
@@ -1049,21 +1056,24 @@ class ConnectHelper {
                 final Offset start = pinch.getStartPosition!;
                 final Offset end = pinch.getUpdatePosition!;
                 wp.parameters.clear();
-                await PluginConnect.onTlGestureEvent(
-                    gesture: 'pinch',
-                    id: wp.widgetPath(),
-                    target: gestureTarget,
-                    data: <String, dynamic>{
-                      'pointer1': {'dx': start.dx, 'dy': start.dy},
-                      'pointer2': {'dx': end.dx, 'dy': end.dy},
-                      'direction': direction,
-                      'velocity': {
-                        'dx': velocity?.pixelsPerSecond.dx,
-                        'dy': velocity?.pixelsPerSecond.dy
+
+                if (ConnectHelper.captureScreen) {
+                  await PluginConnect.onTlGestureEvent(
+                      gesture: 'pinch',
+                      id: wp.widgetPath(),
+                      target: gestureTarget,
+                      data: <String, dynamic>{
+                        'pointer1': {'dx': start.dx, 'dy': start.dy},
+                        'pointer2': {'dx': end.dx, 'dy': end.dy},
+                        'direction': direction,
+                        'velocity': {
+                          'dx': velocity?.pixelsPerSecond.dx,
+                          'dy': velocity?.pixelsPerSecond.dy
+                        },
+                        ...accessibility,
                       },
-                      ...accessibility,
-                    },
-                    layoutParameters: TlBinder.layoutParametersForGestures);
+                      layoutParameters: TlBinder.layoutParametersForGestures);
+                }
               }
             }
             break;
@@ -1075,5 +1085,35 @@ class ConnectHelper {
       tlLogger.v(
           "ERROR: ${gesture.runtimeType.toString()} not found for hashcode: $hashCode");
     }
+  }
+
+  /// Asks the native layer if it can capture the screen with the given
+  /// [screenName].
+  /// [jsonString].
+  ///
+  /// This is done by looking up the AutoLayout configuration for the given
+  /// screen name. If the screen is found, its 'ScreenChange' property is
+  /// returned. If the screen is not found, the 'GlobalScreenSettings' is
+  /// used as a fallback.
+  ///
+  /// Returns `false` if the screen name is not found in the AutoLayout
+  /// configuration.
+  static bool canCaptureScreen(String screenName, String jsonString) {
+    if (jsonString.isEmpty) {
+      return false;
+    }
+
+    // Decode JSON
+    final Map<String, dynamic> jsonConfig = jsonDecode(jsonString);
+
+    if (jsonConfig.containsKey(screenName)) {
+      captureScreen = jsonConfig[screenName]['ScreenChange'] ?? false;
+      return captureScreen;
+    } else if (jsonConfig.containsKey('GlobalScreenSettings')) {
+      captureScreen = jsonConfig['GlobalScreenSettings']['ScreenChange'] ?? false;
+      return captureScreen;
+    }
+
+    return false;
   }
 }

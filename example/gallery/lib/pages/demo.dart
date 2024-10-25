@@ -519,13 +519,13 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
             }
 
             return Container(
-              color: colorScheme.background,
+              color: colorScheme.surface,
               child: contents,
             );
           });
     } else {
       page = Container(
-        color: colorScheme.background,
+        color: colorScheme.surface,
         child: ApplyTextOptions(
           child: Scaffold(
             appBar: appBar,

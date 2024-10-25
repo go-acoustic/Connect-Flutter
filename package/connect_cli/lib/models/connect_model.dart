@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'layout_config_model.dart';
 
 class Connect {

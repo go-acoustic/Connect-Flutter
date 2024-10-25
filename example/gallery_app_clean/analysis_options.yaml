@@ -5,6 +5,7 @@ analyzer:
     include_file_not_found: ignore
     uri_does_not_exist: ignore
     undefined_identifier: ignore
+    use_build_context_synchronously: ignore
 linter:
   # In addition to the flutter_lints
   rules:

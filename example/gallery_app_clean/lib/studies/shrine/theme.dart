@@ -96,12 +96,10 @@ const ColorScheme _shrineColorScheme = ColorScheme(
   secondary: shrinePink50,
   secondaryContainer: shrineBrown900,
   surface: shrineSurfaceWhite,
-  background: shrineBackgroundWhite,
   error: shrineErrorRed,
   onPrimary: shrineBrown900,
   onSecondary: shrineBrown900,
   onSurface: shrineBrown900,
-  onBackground: shrineBrown900,
   onError: shrineSurfaceWhite,
   brightness: Brightness.light,
 );

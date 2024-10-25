@@ -102,7 +102,7 @@ class MailPreviewCard extends StatelessWidget {
                   : theme.scaffoldBackgroundColor,
               iconColor: isStarred
                   ? colorScheme.onSecondary
-                  : colorScheme.onBackground,
+                  : colorScheme.onSurface,
               alignment: Alignment.centerRight,
               padding: const EdgeInsetsDirectional.only(end: 20),
             ),
@@ -133,7 +133,7 @@ class _DismissibleContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       alignment: alignment,
-      curve: standardEasing,
+      curve: Easing.legacy,
       color: backgroundColor,
       duration: kThemeAnimationDuration,
       padding: padding,

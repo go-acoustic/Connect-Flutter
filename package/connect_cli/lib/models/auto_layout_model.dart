@@ -1,21 +1,12 @@
-import 'global_screen_settings_model.dart';
 
 class AutoLayout {
-  GlobalScreenSettings? globalScreenSettings;
+  Map<String, dynamic>? json;
 
-  AutoLayout({this.globalScreenSettings});
+  AutoLayout({this.json});
 
-  AutoLayout.fromJson(Map<String, dynamic> json) {
-    globalScreenSettings = json['GlobalScreenSettings'] != null
-        ? GlobalScreenSettings.fromJson(json['GlobalScreenSettings'])
-        : null;
-  }
+  AutoLayout.fromJson(Map<String, dynamic> this.json);
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (globalScreenSettings != null) {
-      data['GlobalScreenSettings'] = globalScreenSettings!.toJson();
-    }
-    return data;
+    return json ?? {};
   }
 }

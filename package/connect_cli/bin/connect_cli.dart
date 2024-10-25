@@ -18,7 +18,7 @@ void main(List<String> arguments) async {
 
   // For test only
   // String currentProjectDir =
-  //     "/Users/changjieyang/developer/Acoustic/TL-Flutter-Plugin/example/gallery";
+  //     "/Users/changjieyang/developer/Acoustic/Connect-Flutter-beta/example/gallery";
 
   String currentProjectDir = Directory.current.path;
   String pluginRoot = connect_cli.getPluginPath(currentProjectDir);
@@ -38,6 +38,7 @@ void main(List<String> arguments) async {
   var input = File("$currentProjectDir/ConnectConfig.json").readAsStringSync();
   Map<String, dynamic> configMap = jsonDecode(input);
   BasicConfig basicConfig = BasicConfig.fromJson(configMap);
+
   stdout.writeln('Updating LayoutConfig');
   connect_cli.updateConnectLayoutConfig(basicConfig, currentProjectDir);
 
@@ -56,9 +57,9 @@ void main(List<String> arguments) async {
   });
 
   stdout.writeln('connect_flutter_plugin configured');
+  stdout.writeln('connect_flutter_plugin running build and pub get for the Flutter app. \n');
 
   // Then, clean and rebuild the Flutter app:
-  Process.runSync('flutter', ['clean'], runInShell: true);
+  Process.runSync('flutter', ['build'], runInShell: true);
   Process.runSync('flutter', ['pub', 'get'], runInShell: true);
-  stdout.writeln('connect_flutter_plugin clean and pub get for the Flutter app. \n');
 }

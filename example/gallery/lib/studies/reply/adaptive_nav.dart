@@ -502,20 +502,20 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
 
     _drawerCurve = CurvedAnimation(
       parent: _drawerController,
-      curve: standardEasing,
-      reverseCurve: standardEasing.flipped,
+      curve: Easing.legacy,
+      reverseCurve: Easing.legacy.flipped,
     );
 
     _dropArrowCurve = CurvedAnimation(
       parent: _dropArrowController,
-      curve: standardEasing,
-      reverseCurve: standardEasing.flipped,
+      curve: Easing.legacy,
+      reverseCurve: Easing.legacy.flipped,
     );
 
     _bottomAppBarCurve = CurvedAnimation(
       parent: _bottomAppBarController,
-      curve: standardEasing,
-      reverseCurve: standardEasing.flipped,
+      curve: Easing.legacy,
+      reverseCurve: Easing.legacy.flipped,
     );
   }
 
@@ -535,8 +535,8 @@ class _MobileNavState extends State<_MobileNav> with TickerProviderStateMixin {
 
   void _toggleBottomDrawerVisibility() {
     if (_drawerController.value < 0.4) {
-      _drawerController.animateTo(0.4, curve: standardEasing);
-      _dropArrowController.animateTo(0.35, curve: standardEasing);
+      _drawerController.animateTo(0.4, curve: Easing.legacy);
+      _dropArrowController.animateTo(0.35, curve: Easing.legacy);
       return;
     }
 
@@ -731,7 +731,7 @@ class _AnimatedBottomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var fadeOut = Tween<double>(begin: 1, end: -1).animate(
-      drawerController.drive(CurveTween(curve: standardEasing)),
+      drawerController.drive(CurveTween(curve: Easing.legacy)),
     );
 
     return Selector<EmailStore, bool>(
@@ -1278,7 +1278,7 @@ class _SharedAxisTransitionSwitcher extends StatelessWidget {
           reverse: !onSearchPage,
           transitionBuilder: (child, animation, secondaryAnimation) {
             return SharedAxisTransition(
-              fillColor: Theme.of(context).colorScheme.background,
+              fillColor: Theme.of(context).colorScheme.surface,
               animation: animation,
               secondaryAnimation: secondaryAnimation,
               transitionType: SharedAxisTransitionType.scaled,
