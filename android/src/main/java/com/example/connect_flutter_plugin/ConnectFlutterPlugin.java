@@ -1551,7 +1551,7 @@ public class ConnectFlutterPlugin implements FlutterPlugin, ActivityAware, Metho
                 "{" +
                         "\"GlobalScreenSettings\":" + tlGetLayoutConfig() +
                         "," +
-                        "\"TealeafBasicConfig\": {" +
+                        "\"ConnectBasicConfig\": {" +
                         "\"GetImageDataOnScreenLayout\": " + imageData +
                         "}" +
                         "}";

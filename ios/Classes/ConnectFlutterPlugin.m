@@ -85,9 +85,9 @@
     NSLog(@"Device Pixel Density (scale): %f", _scale);
     
     
-    NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"TLFResources" ofType:@"bundle"];
+    NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"ConnectResources" ofType:@"bundle"];
     NSBundle *bundlePath = [[NSBundle alloc] initWithPath:mainPath];
-    NSString *filePath   = [bundlePath pathForResource:@"TealeafBasicConfig" ofType:@"plist"];
+    NSString *filePath   = [bundlePath pathForResource:@"ConnectBasicConfig" ofType:@"plist"];
     _basicConfig         = [NSMutableDictionary dictionaryWithContentsOfFile:filePath];
     _layoutConfig        = [self getLayoutConfig];
     
@@ -139,19 +139,19 @@
 }
 
 - (NSDictionary *) getAdvancedConfig {
-    NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"TLFResources" ofType:@"bundle"];
+    NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"ConnectResources" ofType:@"bundle"];
     NSBundle *bundlePath = [[NSBundle alloc] initWithPath:mainPath];
-    NSString *filePath   = [bundlePath pathForResource:@"TealeafAdvancedConfig" ofType:@"json"];
-    NSLog(@"Tealeaf Advanced Config file: %@", filePath);
+    NSString *filePath   = [bundlePath pathForResource:@"ConnectAdvancedConfig" ofType:@"json"];
+    NSLog(@"Connect Advanced Config file: %@", filePath);
     NSData   *data       = [NSData dataWithContentsOfFile:filePath];
     return [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
 }
 
 - (NSDictionary *) getLayoutConfig {
-    NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"TLFResources" ofType:@"bundle"];
+    NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"ConnectResources" ofType:@"bundle"];
     NSBundle *bundlePath = [[NSBundle alloc] initWithPath:mainPath];
-    NSString *filePath   = [bundlePath pathForResource:@"TealeafLayoutConfig" ofType:@"json"];
-    NSLog(@"Tealeaf Layout Config file: %@", filePath);
+    NSString *filePath   = [bundlePath pathForResource:@"ConnectLayoutConfig" ofType:@"json"];
+    NSLog(@"Connect Layout Config file: %@", filePath);
     NSData   *data       = [NSData dataWithContentsOfFile:filePath];
     return [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
 }

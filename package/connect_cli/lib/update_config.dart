@@ -5,7 +5,7 @@ void updateConfig(String projectDir, String key, dynamic value, String type) {
   try {
     // Update Android Configuration
     String androidPath = path.join(projectDir,
-        'android/app/src/main/assets/TealeafBasicConfig.properties');
+        'android/app/src/main/assets/ConnectBasicConfig.properties');
     File androidFile = File(androidPath);
     if (androidFile.existsSync()) {
       String androidContent = androidFile.readAsStringSync();

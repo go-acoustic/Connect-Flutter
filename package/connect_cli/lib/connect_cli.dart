@@ -87,16 +87,16 @@ updateConnectLayoutConfig(BasicConfig basicConfig, String currentProjectDir) {
 
     try {
       File oldAndroidFile = File(
-          '$currentProjectDir/android/app/src/main/assets/TealeafLayoutConfig.json');
+          '$currentProjectDir/android/app/src/main/assets/ConnectLayoutConfig.json');
       if (oldAndroidFile.existsSync()) {
         oldAndroidFile.deleteSync();
       }
 
-      File('$currentProjectDir/android/app/src/main/assets/TealeafLayoutConfig.json')
+      File('$currentProjectDir/android/app/src/main/assets/ConnectLayoutConfig.json')
           .create(recursive: true)
           .then((File file) {
         file.writeAsString(prettyprint);
-        stdout.writeln('Updated Android TealeafLayoutConfig.json');
+        stdout.writeln('Updated Android ConnectLayoutConfig.json');
       });
 
       if (useRelease != null && useRelease) {

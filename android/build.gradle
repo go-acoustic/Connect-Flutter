@@ -45,7 +45,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // Or kotlin-stdlib-jdk8
 
-    implementation 'io.github.go-acoustic:connect:+'
+    implementation 'io.github.go-acoustic:connect:10.4.29'
 
     // For testing local jars only
     //    implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
