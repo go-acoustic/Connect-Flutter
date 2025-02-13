@@ -53,7 +53,7 @@ class Connect extends StatelessWidget {
 
     Widget? widget = context.widget;
 
-    tlLogger.v(
+    tlLogger.t(
         'GestureDetector Build WIDGET: ${widget.runtimeType.toString()} ${widget.hashCode}');
 
     final WidgetPath wp = WidgetPath.create(context, hash: true);
@@ -78,7 +78,7 @@ class Connect extends StatelessWidget {
           final ScrollEndNotification scrollEndNotification = notification;
           final DragEndDetails? details = scrollEndNotification.dragDetails;
           TlBinder().endScroll(details?.velocity);
-          tlLogger.v('Scroll notification completed');
+          tlLogger.t('Scroll notification completed');
         }
         return false;
       },
@@ -117,7 +117,7 @@ class Connect extends StatelessWidget {
           },
           onPointerMove: (details) {
             tlLogger
-                .v("Gesture move, swipe event checkForScroll() will fire..");
+                .t("Gesture move, swipe event checkForScroll() will fire..");
             ConnectHelper.pointerEventHelper("MOVE", details);
           },
           child: child,
@@ -205,10 +205,11 @@ class LoggingNavigatorObserver extends NavigatorObserver {
           PluginConnect.getStringItemForKey('AutoLayout', 'Tealeaf');
       // tlLogger.d('PluginConnect getStringItemForKey: $jsonString');
       jsonString.then((result) {
-        if (result != null && ConnectHelper.canCaptureScreen(logicalPageName, result)) {
+        if (result != null &&
+            ConnectHelper.canCaptureScreen(logicalPageName, result)) {
           /// Calls Connect plugin to log the screen layout
           PluginConnect.logScreenLayout(logicalPageName);
-          tlLogger.v(
+          tlLogger.t(
               'PluginConnect.logScreenLayout - Pushed ${route.settings.name}');
         }
       }).catchError((error) {
@@ -231,7 +232,7 @@ class LoggingNavigatorObserver extends NavigatorObserver {
     PluginConnect.logScreenViewContextUnLoad(route.settings.name.toString(),
         previousRoute != null ? previousRoute.settings.name.toString() : "");
 
-    tlLogger.v(
+    tlLogger.t(
         'PluginConnect.logScreenViewContextUnLoad -Popped ${route.settings.name}');
   }
 }
@@ -471,7 +472,7 @@ Future<List<Map<String, dynamic>>> parseWidgetTree(Element element) async {
     traverse(element, 0);
   } catch (error) {
     // Handle errors using try-catch block
-    tlLogger.v('Error caught in try-catch: $error');
+    tlLogger.t('Error caught in try-catch: $error');
   }
   return allControlsList;
 }
@@ -529,7 +530,7 @@ class PluginConnect {
   static Future<String> get connectVersion async {
     try {
       final String version = await _channel.invokeMethod('getConnectVersion');
-      tlLogger.v("Connect version: $version");
+      tlLogger.t("Connect version: $version");
       return version;
     } on PlatformException catch (pe) {
       throw ConnectException(pe,
@@ -541,7 +542,7 @@ class PluginConnect {
     try {
       final String sessionId =
           await _channel.invokeMethod('getConnectSessionId');
-      tlLogger.v("Connect sessionId: $sessionId");
+      tlLogger.t("Connect sessionId: $sessionId");
       return sessionId;
     } on PlatformException catch (pe) {
       throw ConnectException(pe,
@@ -695,19 +696,19 @@ class PluginConnect {
     try {
       await _channel.invokeMethod('exception', data);
     } on PlatformException catch (pe) {
-      tlLogger.v(
+      tlLogger.t(
           'Unable to log app exception: ${pe.message}, stack: ${pe.stacktrace}');
       throw ConnectException(pe, msg: ConnectException.logErrorMsg);
     }
   }
 
   static Future<void> onTlPointerEvent({required Map fields}) async {
-    tlLogger.v('fields: ${fields.toString()}');
+    tlLogger.t('fields: ${fields.toString()}');
 
     try {
       await _channel.invokeMethod('pointerEvent', fields);
     } on PlatformException catch (pe, stack) {
-      tlLogger.v(
+      tlLogger.t(
           "pointerEvent exception: ${pe.toString()}, stack: ${stack.toString()}");
       throw ConnectException(pe,
           msg: 'Unable to process flutter pointer event message!');
@@ -1092,7 +1093,7 @@ class PerformanceObserver extends WidgetsBindingObserver {
         loadEventEnd: duration,
       );
 
-      tlLogger.v('_PerformanceObserver($state): $duration');
+      tlLogger.t('_PerformanceObserver($state): $duration');
     });
   }
 

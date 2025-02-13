@@ -100,7 +100,7 @@ class WidgetPath {
     this.path = path.toString();
     parentWidgetType = parent!.widget.runtimeType.toString();
 
-    tlLogger.v(
+    tlLogger.t(
         'Widget path added: ${widget.runtimeType.toString()}, path: $this.path, digest: ${widgetDigest()}');
   }
 
@@ -110,11 +110,11 @@ class WidgetPath {
     for (MapEntry<int, dynamic> entry in widgetContexts.entries) {
       final WidgetPath wp = entry.value;
       if (this == wp) {
-        tlLogger.v("Skip removing current widget path entry");
+        tlLogger.t("Skip removing current widget path entry");
         continue;
       }
       if (isEqual(wp)) {
-        tlLogger.v("Path match [${entry.key}]");
+        tlLogger.t("Path match [${entry.key}]");
         matches.add(entry.key);
       }
     }
@@ -124,7 +124,7 @@ class WidgetPath {
   bool isEqual(WidgetPath other) {
     final bool equal = path.compareTo(other.path) == 0;
     if (equal) {
-      tlLogger.v("Widget paths are equal!");
+      tlLogger.t("Widget paths are equal!");
     }
     return equal;
   }
@@ -139,18 +139,18 @@ class WidgetPath {
           firstPath.position = 1;
         }
         position = keyCount + 1;
-        tlLogger.v('path sibling, count: $position');
+        tlLogger.t('path sibling, count: $position');
       } else {
         if (existingKeys.contains(key)) {
           WidgetPath wp = widgetContexts[key];
           position = wp.position;
-          tlLogger.v('Replacing logged widget: $key, position: $position');
+          tlLogger.t('Replacing logged widget: $key, position: $position');
         } else {
-          tlLogger.v(
+          tlLogger.t(
               'Removing $keyCount siblings(new key: $key): ...${firstPath.path.substring(max(0, firstPath.path.length - 90))}');
           for (int eKey in existingKeys) {
             WidgetPath wp = widgetContexts[eKey];
-            tlLogger.v(
+            tlLogger.t(
                 'Removing $eKey, position: ${wp.position}, used: ${wp.usedInLayout}');
             removePath(eKey);
           }
@@ -213,7 +213,7 @@ class _TlConfiguration {
       }
       final String data = await _dataLoader!();
       _configureInformation = jsonDecode(data);
-      tlLogger.v('Global configuration loaded');
+      tlLogger.t('Global configuration loaded');
     }
   }
 
@@ -248,7 +248,7 @@ class TlBinder extends WidgetsBindingObserver {
 
   TlBinder._internal() {
     _instance = this;
-    tlLogger.v('TlBinder INSTANTIATED!!');
+    tlLogger.t('TlBinder INSTANTIATED!!');
   }
 
   static const bool createRootLayout = false;
@@ -315,9 +315,9 @@ class TlBinder extends WidgetsBindingObserver {
         final Velocity? velocity = swipe.velocity;
         final String direction = swipe.direction;
 
-        tlLogger.v(
+        tlLogger.t(
             'Scrollable start timestamp: ${swipe.getStartTimestampString()}');
-        tlLogger.v(
+        tlLogger.t(
             'Scrollable, start: ${start?.dx},${start?.dy}, end: ${end?.dx},${end?.dy}, velocity: $velocity, direction: $direction');
 
         logWidgetTree().then((result) async {
@@ -348,7 +348,6 @@ class TlBinder extends WidgetsBindingObserver {
                 },
                 layoutParameters: result);
           }
-
         }).catchError((error) {
           // Handle errors if the async function throws an error
           tlLogger.e('Error: $error');
@@ -357,7 +356,7 @@ class TlBinder extends WidgetsBindingObserver {
         // For Cancelling the pointerUp event
         Connect.isSwiping = false;
       } else {
-        tlLogger.v('Incomplete scroll before frame');
+        tlLogger.t('Incomplete scroll before frame');
       }
     }
   }
@@ -421,7 +420,7 @@ class TlBinder extends WidgetsBindingObserver {
           await PluginConnect.tlSetEnvironment(
               screenWidth: screenWidth, screenHeight: screenHeight);
 
-          tlLogger.v('TlBinder, renderView w: $screenWidth, h: $screenHeight');
+          tlLogger.t('TlBinder, renderView w: $screenWidth, h: $screenHeight');
         }
       }
     }
@@ -445,7 +444,7 @@ class TlBinder extends WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.paused:
         scrollCapture = null;
-        tlLogger.v("Screenview UNLOAD");
+        tlLogger.t("Screenview UNLOAD");
         break;
       case AppLifecycleState.resumed:
         // TODO:
@@ -458,10 +457,10 @@ class TlBinder extends WidgetsBindingObserver {
         // final RenderView? renderView = binding.renderView;
         // final BuildContext? context = renderView?.attached ?? false ? renderView?.element?.buildContext : null;        // Widget _rootWidget = fv.context.widget;
 
-        tlLogger.v("Screenview LOAD");
+        tlLogger.t("Screenview LOAD");
         break;
       default:
-        tlLogger.v("Screenview: ${state.toString()}");
+        tlLogger.t("Screenview: ${state.toString()}");
         break;
     }
     super.didChangeAppLifecycleState(state);
@@ -581,7 +580,7 @@ class TlBinder extends WidgetsBindingObserver {
       if (contextString.startsWith('State') &&
           contextString.endsWith('(DEFUNCT)(no widget)')) {
         tlLogger
-            .v("Deleting obsolete path item: $key, context: $contextString");
+            .t("Deleting obsolete path item: $key, context: $contextString");
         WidgetPath.removePath(key);
         continue;
       }
@@ -610,10 +609,10 @@ class TlBinder extends WidgetsBindingObserver {
         if (subType.compareTo("ImageView") == 0) {
           image = await getData(widget);
           if (image == null) {
-            tlLogger.v("Image is empty!");
+            tlLogger.t("Image is empty!");
             continue;
           }
-          tlLogger.v('Image is available: ${widget.runtimeType.toString()}');
+          tlLogger.t('Image is available: ${widget.runtimeType.toString()}');
         } else if (subType.compareTo("TextView") == 0) {
           text = getData(widget) ?? '';
 
@@ -624,7 +623,7 @@ class TlBinder extends WidgetsBindingObserver {
             for (final String pattern in maskValuePatterns!) {
               if (text!.contains(RegExp(pattern))) {
                 masked = true;
-                tlLogger.v(
+                tlLogger.t(
                     'Masking matched content with RE: $pattern, text: $text');
                 break;
               }
@@ -634,14 +633,14 @@ class TlBinder extends WidgetsBindingObserver {
             try {
               text = await maskText(text!);
             } on ConnectException catch (te) {
-              tlLogger.v('Unable to mask text. ${te.getMsg}');
+              tlLogger.t('Unable to mask text. ${te.getMsg}');
             }
 
-            tlLogger.v(
+            tlLogger.t(
                 "Text Layout masked text: $text, Widget: ${widget.runtimeType.toString()}, "
                 "Digest for MASKING: ${wp.widgetDigest()}");
           } else {
-            tlLogger.v(
+            tlLogger.t(
                 "Text Layout text: $text, Widget: ${widget.runtimeType.toString()}");
           }
 
@@ -694,9 +693,9 @@ class TlBinder extends WidgetsBindingObserver {
         final Offset position = box.localToGlobal(Offset.zero);
 
         if (image != null) {
-          tlLogger.v("Adding image to layouts....");
+          tlLogger.t("Adding image to layouts....");
         }
-        tlLogger.v(
+        tlLogger.t(
             '--> Layout Flutter -- x: ${position.dx}, y: ${position.dy}, width: ${box.size.width.toInt()}, text: $text');
 
         layouts.add(<String, dynamic>{
@@ -731,7 +730,7 @@ class TlBinder extends WidgetsBindingObserver {
     layoutParametersForGestures =
         hasGestures ? List.unmodifiable(layouts) : null;
 
-    tlLogger.v(
+    tlLogger.t(
         "WigetPath cache size, before: $pathCount, after: ${WidgetPath.size}, # of layouts: ${layouts.length}");
 
     return layouts;
@@ -931,9 +930,9 @@ class ConnectHelper {
       final String gestureTarget = getGestureTarget(wp);
       final Map<String, dynamic> accessibility = checkForSemantics(wp);
 
-      tlLogger.v(
+      tlLogger.t(
           '${gestureType!.toUpperCase()}: Gesture widget, context hash: ${context.hashCode}, widget hash: $hashCode');
-      tlLogger.v('--> Path: ${wp.widgetPath()}, digest: ${wp.widgetDigest()}');
+      tlLogger.t('--> Path: ${wp.widgetPath()}, digest: ${wp.widgetDigest()}');
 
       if (ConnectHelper.captureScreen) {
         await PluginConnect.onTlGestureEvent(
@@ -944,7 +943,7 @@ class ConnectHelper {
             layoutParameters: TlBinder.layoutParametersForGestures);
       }
     } else {
-      tlLogger.v(
+      tlLogger.t(
           "ERROR: ${gesture.runtimeType.toString()} gesture not found for hashcode: $hashCode");
     }
   }
@@ -953,7 +952,7 @@ class ConnectHelper {
     final String json = jsonEncode(pe, toEncodable: encodeJsonPointerEvent);
     final Map<String, dynamic> fields = jsonDecode(json);
 
-    tlLogger.v("My PointerEvent $action TRAP!");
+    tlLogger.t("My PointerEvent $action TRAP!");
 
     if (fields.containsKey('timestamp')) {
       fields['timestamp'] = fields['timestamp'].toString();
@@ -972,7 +971,7 @@ class ConnectHelper {
     data["stacktrace"] = fed.stack.toString();
     data["handled"] = true;
 
-    tlLogger.v(
+    tlLogger.t(
         "!!! Flutter exception, type: $type, class: $errorString, hash: ${fed.exception.hashCode}");
 
     return data;
@@ -1022,7 +1021,7 @@ class ConnectHelper {
       final String gestureTarget = getGestureTarget(wp);
       final Map<String, dynamic> accessibility = checkForSemantics(wp);
 
-      tlLogger.v(
+      tlLogger.t(
           '${onType.toUpperCase()}: Gesture widget, context hash: ${context.hashCode}, widget hash: $hashCode');
 
       switch (onType) {
@@ -1049,7 +1048,7 @@ class ConnectHelper {
               final _Pinch pinch = wp.parameters['pinch'];
               pinch.fingers = fingers;
               final String direction = pinch.pinchResult();
-              tlLogger.v(
+              tlLogger.t(
                   '--> Pinch, fingers: ${pinch.getMaxFingers}, direction: $direction');
 
               if (direction.isNotEmpty) {
@@ -1082,7 +1081,7 @@ class ConnectHelper {
           break;
       }
     } else {
-      tlLogger.v(
+      tlLogger.t(
           "ERROR: ${gesture.runtimeType.toString()} not found for hashcode: $hashCode");
     }
   }
@@ -1110,7 +1109,8 @@ class ConnectHelper {
       captureScreen = jsonConfig[screenName]['ScreenChange'] ?? false;
       return captureScreen;
     } else if (jsonConfig.containsKey('GlobalScreenSettings')) {
-      captureScreen = jsonConfig['GlobalScreenSettings']['ScreenChange'] ?? false;
+      captureScreen =
+          jsonConfig['GlobalScreenSettings']['ScreenChange'] ?? false;
       return captureScreen;
     }
 

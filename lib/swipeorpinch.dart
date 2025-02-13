@@ -73,19 +73,19 @@ class DetectorState extends State<SwipeOrPinchDetector> {
       return GestureDetector(
         behavior: widget.behavior,
         onScaleStart: (ScaleStartDetails details) {
-          tlLogger.v('ScaleStartDetails: ${details.toString()}');
+          tlLogger.t('ScaleStartDetails: ${details.toString()}');
           lastScale = null;
         },
         onScaleUpdate: (ScaleUpdateDetails details) {
           if (lastScale == null || lastScale != details.scale) {
             tlLogger
-                .v('ScaleUpdateDetails scale changed: ${details.toString()}');
+                .t('ScaleUpdateDetails scale changed: ${details.toString()}');
           }
           lastScale = details.scale;
         },
         onScaleEnd: (ScaleEndDetails details) {
           if (lastScale != null) {
-            tlLogger.v(
+            tlLogger.t(
                 'ScaleEndDetails. scale: $lastScale, fingers: ${details.pointerCount}, ${details.toString()}');
             widget.onPinch?.call(lastScale);
           }

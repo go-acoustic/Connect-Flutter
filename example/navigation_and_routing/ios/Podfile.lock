@@ -1,0 +1,59 @@
+PODS:
+  - AcousticConnectDebug (1.0.50):
+    - AcousticConnectDebug/Core (= 1.0.50)
+  - AcousticConnectDebug/Core (1.0.50):
+    - TealeafDebug
+  - connect_flutter_plugin (2.33.3-beta):
+    - AcousticConnectDebug
+    - Flutter
+  - EOCoreDebug (2.3.312)
+  - Flutter (1.0.0)
+  - package_info (0.0.1):
+    - Flutter
+  - package_info_plus (0.4.5):
+    - Flutter
+  - TealeafDebug (10.6.320):
+    - TealeafDebug/Core (= 10.6.320)
+  - TealeafDebug/Core (10.6.320):
+    - EOCoreDebug
+  - url_launcher_ios (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - connect_flutter_plugin (from `.symlinks/plugins/connect_flutter_plugin/ios`)
+  - Flutter (from `Flutter`)
+  - package_info (from `.symlinks/plugins/package_info/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+
+SPEC REPOS:
+  trunk:
+    - AcousticConnectDebug
+    - EOCoreDebug
+    - TealeafDebug
+
+EXTERNAL SOURCES:
+  connect_flutter_plugin:
+    :path: ".symlinks/plugins/connect_flutter_plugin/ios"
+  Flutter:
+    :path: Flutter
+  package_info:
+    :path: ".symlinks/plugins/package_info/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+
+SPEC CHECKSUMS:
+  AcousticConnectDebug: a473383005445a91662947a3863f8b1a0292de10
+  connect_flutter_plugin: 70b818a2d7725ad6361a92fc3df65aa7dcdf1aa2
+  EOCoreDebug: 1b8552d51c2571562fc768f75f0e00cabef85de5
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
+  package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
+  TealeafDebug: feb1a02a70a43eac7576676675e8f15ab0658df9
+  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+
+PODFILE CHECKSUM: a57f30d18f102dd3ce366b1d62a55ecbef2158e5
+
+COCOAPODS: 1.15.2

@@ -30,15 +30,13 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 30
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
     }
 
     compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+    namespace 'com.example.gallery.crane'
 }
 
 dependencies {

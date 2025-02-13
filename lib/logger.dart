@@ -9,7 +9,7 @@ class DebugOnlyFilter extends LogFilter {
       return event.level == Level.error;
     }
     return (event.level == Level.debug ||
-        event.level == Level.verbose ||
+        event.level == Level.trace ||
         event.level == Level.error);
   }
 }
@@ -40,6 +40,6 @@ final dynamic _verbosePrinter =
 
 final Logger tlLogger = Logger(
   filter: DebugOnlyFilter(),
-  printer: HybridPrinter(_prettyPrinter, verbose: _verbosePrinter),
+  printer: HybridPrinter(_prettyPrinter, trace: _verbosePrinter),
   output: ConsoleOutput(),
 );

@@ -1,3 +1,35 @@
+## 2.34.1-beta
+Beta Connect-Flutter Change Notes: 
+Bug Fixes
+
+- None.
+
+Improvements
+
+- Support Logger 2.0.0
+
+Our environment for this release:
+
+- Flutter SDK 3.27.4
+- Visual Studio Code Version: 1.90.2 (Universal)
+- Xcode 15.4
+- MacOS 15.2
+- iOS 13.x to 18.x
+- Supported architectures:
+	- simulator
+		- arm64
+		- x86_64
+	- device
+		- arm64
+-Android 21-35
+
+
+Known Issues
+
+- Android app will have build issues on AS IDE LadyBug and newer, due to out of date packages.
+- Android & IOS platforms are supported.
+- When Navigation route isn't set, replay shows null screenview.
+- Sometimes masking overlay carries to next screen due to Flutter view tree design.
 ## 2.34.0
 Beta Connect-Flutter Change Notes: 
 Bug Fixes

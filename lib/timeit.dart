@@ -17,13 +17,13 @@ class TimeIt {
     final dynamic result = function();
     durations.add(
         DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch);
-    tlLogger.v('$prefix required ${durations.last} ms');
+    tlLogger.t('$prefix required ${durations.last} ms');
     return result;
   }
 
   int elapsed() => durations.isNotEmpty ? durations.first : 0;
   int diff() => durations.length == 2 ? (durations[1] - durations[0]) : 0;
 
-  void showResults() => tlLogger.v(
+  void showResults() => tlLogger.t(
       '$label. AOP part: ${diff()} ms, injected function part: ${elapsed()} ms');
 }

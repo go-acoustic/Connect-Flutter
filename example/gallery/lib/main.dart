@@ -5,8 +5,8 @@
 import 'package:connect_flutter_plugin/connect_flutter_plugin.dart';
 import 'package:connect_flutter_plugin/logger.dart';
 import 'package:dual_screen/dual_screen.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -20,7 +20,7 @@ import 'package:gallery/routes.dart';
 import 'package:gallery/themes/gallery_theme_data.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'firebase_options.dart';
+// import 'firebase_options.dart';
 import 'layout/adaptive.dart';
 
 export 'package:gallery/data/demos.dart' show pumpDeferredLibraries;
@@ -31,17 +31,17 @@ void main() async {
   if (defaultTargetPlatform != TargetPlatform.linux &&
       defaultTargetPlatform != TargetPlatform.windows) {
     WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    };
-    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Tealeaf
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
+    // await Firebase.initializeApp(
+    //   options: DefaultFirebaseOptions.currentPlatform,
+    // );
+    // FlutterError.onError = (errorDetails) {
+    //   FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    // };
+    // // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Tealeaf
+    // PlatformDispatcher.instance.onError = (error, stack) {
+    //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    //   return true;
+    // };
   }
 
   ///
