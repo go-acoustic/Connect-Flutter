@@ -30,13 +30,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.10"
-  analysis_defaults:
-    dependency: "direct dev"
-    description:
-      path: "../analysis_defaults"
-      relative: true
-    source: path
-    version: "0.0.0"
   analyzer:
     dependency: transitive
     description:
@@ -97,10 +90,10 @@ packages:
     dependency: "direct main"
     description:
       name: connect_flutter_plugin
-      sha256: "18a908919492c9d68444cbf5eef24f2e62a62af6c3fda4da45e13650a7929a5f"
+      sha256: "48411c0cac8029ada7f2e6469e55e5f4578ac6322a7ae325ab928168ddb69fd0"
       url: "https://pub.dev"
     source: hosted
-    version: "2.33.3-beta"
+    version: "2.34.1-beta"
   convert:
     dependency: transitive
     description:
@@ -163,13 +156,13 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_lints:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: "5398f14efa795ffb7a33e9b6a08798b26a180edac4ad7db3f231e40f82ce11e1"
+      sha256: a25a15ebbdfc33ab1cd26c63a6ee519df92338a9c10f122adda92938253bef04
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0"
+    version: "2.0.3"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -272,18 +265,18 @@ packages:
     dependency: transitive
     description:
       name: lints
-      sha256: c35bb79562d980e9a453fc715854e1ed39e24e7d0297a880ef54e17f9874a9d7
+      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.1"
+    version: "2.1.1"
   logger:
     dependency: transitive
     description:
       name: logger
-      sha256: "7ad7215c15420a102ec687bb320a7312afd449bac63bfb1c60d9787c27b9767f"
+      sha256: be4b23575aac7ebf01f225a241eb7f6b5641eeaf43c6a8613510fc2f8cf187d1
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.0"
+    version: "2.5.0"
   logging:
     dependency: transitive
     description:
