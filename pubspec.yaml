@@ -1,10 +1,10 @@
 name: connect_flutter_plugin
 description: Acoustic Connect can monitor traffic between your application and server. It captures device context and user activity to monitor and evaluate the performance of your applications
-version: 2.35.0
+version: 2.36.0
 homepage: https://pub.dev/packages/connect_flutter_plugin
 repository: https://github.com/acoustic-analytics/Connect-Flutter-Plugin
-build-name: 2.35.0
-build-number: 2.35.0
+build-name: 2.36.0
+build-number: 2.36.0
 environment:
   sdk: '>=2.17.0 <4.0.0'
   flutter: '>=2.5.0'
@@ -15,8 +15,7 @@ dependencies:
   http: ^1.0.0
   logger: ^2.0.0
   yaml: ^3.1.1
-  package_info: ^2.0.0
-  package_info_plus: ^4.2.0
+  package_info_plus: ^8.3.0
 dev_dependencies:
   build_runner: ^2.4.8
   flutter_test:
