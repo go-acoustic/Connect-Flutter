@@ -1,3 +1,13 @@
+//
+// Copyright (C) 2025 Acoustic, L.P. All rights reserved.
+//
+// NOTICE: This file contains material that is confidential and proprietary to
+// Acoustic, L.P. and/or other developers. No license is granted under any intellectual or
+// industrial property rights of Acoustic, L.P. except as may be provided in an agreement with
+// Acoustic, L.P. Any unauthorized copying or distribution of content from this file is
+// prohibited.
+//
+
 #import "ConnectFlutterPlugin.h"
 #import "TlImage.h"
 #import "PointerEvent.h"
@@ -49,9 +59,10 @@
 }
 
 /**
- Registers the ConnectFlutterPlugin with the Flutter plugin registrar, creating a communication channel between Flutter and native code.
-
- @param registrar An object conforming to the FlutterPluginRegistrar protocol.
+ * Registers the ConnectFlutterPlugin with the Flutter plugin registrar.
+ * This creates a communication channel between Flutter and native code.
+ *
+ * @param registrar An object conforming to the FlutterPluginRegistrar protocol.
  */
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel
@@ -61,9 +72,10 @@
 }
 
 /**
- Initializes the ConnectFlutterPlugin instance, configuring Connect integration and handling image-related settings.
-
- @return An instance of ConnectFlutterPlugin.
+ * Initializes the ConnectFlutterPlugin instance.
+ * Configures Connect integration and handles image-related settings.
+ *
+ * @return An instance of ConnectFlutterPlugin.
  */
 - (id) init {
     self = [super init];
@@ -112,32 +124,62 @@
     return self;
 }
 
+/**
+ * Retrieves the current screen orientation.
+ *
+ * @return An integer representing the orientation: 1 for landscape, 0 for portrait.
+ */
 -(int) getOrientation {
-    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-
+    UIInterfaceOrientation orientation = [UIApplication sharedApplication].windows.firstObject.windowScene.interfaceOrientation;
     return (orientation == UIInterfaceOrientationLandscapeLeft) || (orientation == UIInterfaceOrientationLandscapeRight)
         ? 1 : 0;
 }
 
+/**
+ * Resets the screen load time to the current time.
+ */
 -(void) resetScreenLoadTime {
     _screenLoadTime = [NSDate timeIntervalSinceReferenceDate];
 }
 
+/**
+ * Converts a string to an NSNumber.
+ *
+ * @param stringNumber The string to convert.
+ * @return The converted NSNumber.
+ */
 - (NSNumber *) convertNSStringToNSNumber:(NSString *) stringNumber {
     NSNumber *number = [[[NSNumberFormatter alloc]init] numberFromString:stringNumber];
     return number;
 }
 
+/**
+ * Checks if a parameter exists in a dictionary and converts it to a long integer.
+ *
+ * @param map The dictionary containing the parameter.
+ * @param key The key of the parameter to check.
+ * @return The parameter value as a long integer.
+ */
 - (long) checkParameterStringAsInteger:(NSDictionary *) map withKey:(NSString *) key {
     NSString *stringInteger = (NSString *) [self checkForParameter:map withKey:key];
     return [[self convertNSStringToNSNumber:stringInteger] longValue];
 }
 
+/**
+ * Calculates the screen view offset in milliseconds.
+ *
+ * @return The screen view offset as a time interval.
+ */
 -(NSTimeInterval) getScreenViewOffset {
     NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
     return (_screenOffset = (now - _screenLoadTime) * 1000);
 }
 
+/**
+ * Retrieves advanced configuration settings from a JSON file.
+ *
+ * @return A dictionary containing the advanced configuration.
+ */
 - (NSDictionary *) getAdvancedConfig {
     NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"ConnectResources" ofType:@"bundle"];
     NSBundle *bundlePath = [[NSBundle alloc] initWithPath:mainPath];
@@ -147,6 +189,11 @@
     return [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
 }
 
+/**
+ * Retrieves layout configuration settings from a JSON file.
+ *
+ * @return A dictionary containing the layout configuration.
+ */
 - (NSDictionary *) getLayoutConfig {
     NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"ConnectResources" ofType:@"bundle"];
     NSBundle *bundlePath = [[NSBundle alloc] initWithPath:mainPath];
@@ -156,15 +203,30 @@
     return [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
 }
 
+/**
+ * Retrieves basic configuration settings.
+ *
+ * @return A mutable dictionary containing the basic configuration.
+ */
 - (NSMutableDictionary *) getBasicConfig {
     return _basicConfig;
 }
 
+/**
+ * Retrieves the build number of the application.
+ *
+ * @return A string representing the build number.
+ */
 - (NSString *) getBuildNumber {
     NSString * build = [[NSBundle mainBundle] objectForInfoDictionaryKey: (NSString *)kCFBundleVersionKey];
     return build;
 }
 
+/**
+ * Converts a layout configuration dictionary to a JSON string.
+ *
+ * @return A JSON string representing the basic layout configuration.
+ */
 - (NSString *) getBasicLayoutConfigurationString {
     NSDictionary *autoLayout = _layoutConfig[@"AutoLayout"];
     //NSDictionary *globalScreenSettings = autoLayout[@"GlobalScreenSettings"];
@@ -172,10 +234,21 @@
     return [self getJSONString:autoLayout];
 }
 
+/**
+ * Converts the global configuration dictionary to a JSON string.
+ *
+ * @return A JSON string representing the global configuration.
+ */
 - (NSString *) getGlobalConfigurationString {
     return [self getJSONString:_basicConfig];
 }
 
+/**
+ * Converts an object to a JSON string.
+ *
+ * @param obj The object to convert.
+ * @return A JSON string representation of the object.
+ */
 - (NSString *) getJSONString: (NSObject *) obj {
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:obj
@@ -189,6 +262,14 @@
     return jsonString;
 }
 
+/**
+ * Checks for a parameter in a dictionary and throws an exception if not found.
+ *
+ * @param map The dictionary to check.
+ * @param key The key of the parameter to check.
+ * @param subKey The subkey to check within the parameter.
+ * @return The parameter value.
+ */
 - (NSObject *) checkForParameter:(NSDictionary *) map withKey:(NSString*) key withSubKey:(NSString *) subKey {
     NSObject *object = map[key];
     
@@ -210,6 +291,13 @@
     return [self checkForParameter:(NSDictionary *) object withKey:subKey];
 }
 
+/**
+ * Checks for a parameter in a dictionary and throws an exception if not found.
+ *
+ * @param map The dictionary to check.
+ * @param key The key of the parameter to check.
+ * @return The parameter value.
+ */
 - (NSObject *) checkForParameter:(NSDictionary *) map withKey:(NSString*) key {
     NSObject *object = map[key];
     
@@ -230,12 +318,28 @@
     return object;
 }
 
+
+/**
+ * Sends a custom event with the specified name and additional data.
+ *
+ * @param name The name of the custom event to be sent.
+ * @param data A dictionary containing additional data to be included with the event.
+ */
 - (void) alternateCustomEvent:(NSString *) name addData:(NSDictionary *) data {
     NSDictionary *customEventData = @{@"customData": @{@"name": name, @"data": data}};
     
     [self tlLogMessage:customEventData addType: @5];
 }
 
+
+/**
+ * Retrieves a PointerEvent object from the provided dictionary.
+ *
+ * @param map A dictionary containing the data required to construct a PointerEvent.
+ *            The dictionary should include the necessary keys and values to map
+ *            to the properties of a PointerEvent.
+ * @return A PointerEvent object created using the data from the dictionary.
+ */
 - (PointerEvent *) getPointerEvent:(NSDictionary *) map {
     NSString *event  = (NSString *) [self checkForParameter:map withKey:@"action"];
     CGFloat  dx = [(NSNumber *)[self checkForParameter:map withKey:@"position" withSubKey:@"dx"] floatValue];
@@ -261,13 +365,13 @@
 }
 
 /**
- Applies a mask to an image with specified objects and their attributes.
-
- @param bgImage The background image to be masked.
- @param maskObjects An array of dictionaries containing text and position attributes for the mask.
- Each dictionary should contain keys: @"text" (NSString) and @"position" (NSDictionary).
- The @"position" dictionary should contain keys: @"x", @"y", @"width", @"height" (CGFloat).
- @return A new UIImage masked with the provided objects.
+ * Applies a mask to an image with specified objects and their attributes.
+ *
+ * @param bgImage The background image to be masked.
+ * @param maskObjects An array of dictionaries containing text and position attributes for the mask.
+ * Each dictionary should contain keys: @"text" (NSString) and @"position" (NSDictionary).
+ * The @"position" dictionary should contain keys: @"x", @"y", @"width", @"height" (CGFloat).
+ * @return A new UIImage masked with the provided objects.
  */
 - (UIImage *)maskImageWithObjects:(UIImage *)bgImage withObjects:(NSArray *)maskObjects {
     CGFloat fontScale = 0.72f;
@@ -312,10 +416,14 @@
     return maskedUIImage;
 }
 
-
+/**
+ * Captures a screenshot of the current screen.
+ *
+ * @return A UIImage representing the screenshot.
+ */
 - (UIImage *) takeScreenShot {
     UIImage *screenImage = nil;
-    UIViewController *rootController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    UIViewController *rootController = [self getCurrentMainViewController];
     
     if (rootController && [rootController respondsToSelector:@selector(view)])
     {
@@ -344,6 +452,14 @@
     return screenImage;
 }
 
+/**
+ * Processes layout entries and applies masking rules.
+ *
+ * @param controls An array of layout entries to process.
+ * @param logicalPageName The logical name of the page for masking rules.
+ * @param maskItems A mutable array to store mask objects.
+ * @return An updated array of layout entries.
+ */
 - (NSMutableArray *) fixupLayoutEntries:(NSArray *) controls addLogicalPageName: (NSString *) logicalPageName returnMaskArray: (NSMutableArray *) maskItems {
     NSMutableArray *newControls = [controls mutableCopy];
     
@@ -362,24 +478,26 @@
                     if (position != nil) {
                         // Use label as masking regex
                         NSDictionary *accessibility = (NSDictionary *) newEntry[@"accessibility"];
-                        if (accessibility && accessibility[@"label"]) {
-                            
-                            bool masked = [self willMaskWithAccessibilityLabel:accessibility[@"label"] addLogicalPageName:logicalPageName];
-                            
-                            if (masked) {
-                                [maskItems addObject:@{@"position": position, @"text": @""}];
-                            } else {
-                                NSDictionary *currentState = (NSDictionary *) newEntry[@"currState"];
-                                NSString *text = @"";
-                                
-                                if (currentState != nil) {
-                                    NSString *currentStateText = currentState[@"text"];
-                                    if (currentStateText != nil) {
-                                        text = currentStateText;
-                                    }
-                                }
+                        NSString *objId = newEntry && newEntry[@"id"] ? newEntry[@"id"] : @"";
+                        NSString *accId = accessibility && accessibility[@"id"] ? accessibility[@"id"] : @"";
+                        NSString *accLabel = accessibility && accessibility[@"label"] ? accessibility[@"label"] : @"";
+                        NSDictionary *currentState = (NSDictionary *) newEntry[@"currState"];
+                        NSString *currentStateText;
+                        if (currentState != nil) {
+                            currentStateText = currentState[@"text"];
+                        }
+                        
+                        bool willMask = [self willMaskWithAccessibility:objId text:currentStateText accId:accId accLabel:accLabel addLogicalPageName:logicalPageName];
+                        if (willMask) {
+                            [maskItems addObject:@{@"position": position, @"text": @""}];
+                            // Remove value to mask
+                            if (currentStateText != nil) {
+                                NSMutableDictionary *mutableCurrentState = [currentState mutableCopy];
+                                mutableCurrentState[@"text"] = @"";
+                                newEntry[@"currState"] = mutableCurrentState;
                             }
                         }
+                        
                     }
                 }
                 
@@ -443,11 +561,7 @@
  */
 - (void) tlLogScreenLayout: (NSDictionary *) args {
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIViewController *uv = [UIApplication sharedApplication].keyWindow.rootViewController;
-        while (uv.presentedViewController) {
-            uv = uv.presentedViewController;
-        }
-
+        UIViewController *uv = [self getCurrentMainViewController];
 //        NSString *tlType = (NSString *) [self checkForParameter:args withKey:@"tlType"];
         NSString *name = (NSString *) [self checkForParameter:args withKey:@"name"];
         NSNumber *delay = 0;
@@ -467,13 +581,35 @@
     });
 }
 
+- (UIViewController*) getCurrentMainViewController {
+    UIViewController *topController;
+    @try {
+        topController = EOApplicationHelper.sharedInstance.getUIWindow.rootViewController;
+        while (topController.presentedViewController) {
+            topController = topController.presentedViewController;
+        }
+        
+        if ([topController isKindOfClass:[UITabBarController class]] &&
+            ((UITabBarController*) topController).selectedViewController != nil) {
+            topController = ((UITabBarController*) topController).selectedViewController;
+        }
+    }
+    @catch(NSException* exception) {
+        @throw exception;
+    }
+    @finally {
+        // Nothing to be done in finally
+    }
+    return topController;
+}
+
 /**
- * Logs an event for when a screen view context is unloaded.
+ * Logs a screen view context unload event.
  *
- * @param args A dictionary containing the parameters for the logging event.
- * The keys should include 'name' and 'referrer'.
- * 'name' is the logical name of the current page.
- * 'referrer' is the source that led the user to this page.
+ * @param args A dictionary containing the parameters for the event.
+ * Keys include:
+ * - "name": Logical name of the current page.
+ * - "referrer": Source that led the user to this page.
  */
 - (void) tlLogScreenViewContextUnload: (NSDictionary *) args {
         // Checking for 'name' parameter in the args, which is supposed to be the logical name of the current page
@@ -485,8 +621,15 @@
         [[ConnectCustomEvent sharedInstance] logScreenViewContext:logicalPageName withClass:cllasss applicationContext:ConnectScreenViewTypeUnload referrer:referrer];
 }
 
-
-- (NSArray *)retrieveMaskAccessibilityLabelListFromJSON:(NSDictionary *)inputJSON forLogicalPage:(NSString *)logicalPageName {
+/**
+ * Retrieves a list of accessibility labels for masking from a JSON configuration.
+ *
+ * @param inputJSON The JSON configuration dictionary.
+ * @param logicalPageName The logical page name to retrieve masking settings for.
+ * @return An array of accessibility labels for masking.
+ */
+- (NSArray *)retrieveMaskAccessibilityListFromJSON:(NSDictionary *)inputJSON forLogicalPage:(NSString *)logicalPageName forKey:(NSString *)key {
+    
     // Check if the input JSON exists and has the necessary structure
     if (inputJSON && [inputJSON isKindOfClass:[NSDictionary class]]) {
         // Check if the logicalPageName exists, if not, use "GlobalScreenSettings"
@@ -496,9 +639,8 @@
         NSDictionary *masking = pageSettings[@"Masking"];
         NSNumber *hasMasking = masking[@"HasMasking"];
         if (masking && hasMasking && [hasMasking boolValue]) {
-            NSArray *maskAccessibilityLabelList = masking[@"MaskAccessibilityLabelList"];
-            
-            // Check if "MaskAccessibilityLabelList" exists and is an array
+            NSArray *maskAccessibilityLabelList = masking[key];
+            // Check if exists and is an array
             if (maskAccessibilityLabelList && [maskAccessibilityLabelList isKindOfClass:[NSArray class]]) {
                 return maskAccessibilityLabelList;
             }
@@ -510,28 +652,68 @@
 }
 
 
-- (BOOL)willMaskWithAccessibilityLabel:(NSString*)label addLogicalPageName:(NSString *) logicalPageName {
+/**
+ * Determines whether masking is required based on accessibility attributes and logical page name.
+ *
+ * @param objId The object ID to check against masking rules.
+ * @param text The text value to check against masking rules.
+ * @param accId The accessibility ID to check against masking rules.
+ * @param label The accessibility label to check against masking rules.
+ * @param logicalPageName The logical page name used to retrieve masking settings.
+ * @return YES if masking is required, NO otherwise.
+ */
+- (BOOL)willMaskWithAccessibility:(NSString*) objId text:(NSString*) text accId:(NSString *) accId accLabel:(NSString *) label addLogicalPageName:(NSString *) logicalPageName {
+    // Retrieve the shared instance of EOApplicationHelper
     EOApplicationHelper* helper = [[EOApplicationHelper sharedInstance] init];
-    NSArray      *accessibilityLabelArray;
+    NSDictionary *item; // Configuration dictionary
+    NSArray *accessibilityIdArray; // Array of accessibility IDs for masking
+    NSArray *accessibilityLabelArray; // Array of accessibility labels for masking
+    NSArray *tagRegexArray; // Array of regex patterns for masking based on tags
+    NSArray *valueRegexArray; // Array of regex patterns for masking based on values
     
+    // Fetch the configuration item for "AutoLayout" from the TLFCoreModule
     id returnedObject = [helper getConfigItem:@"AutoLayout" forModuleName:@"TLFCoreModule"];
-
-    // Casting the returned object to an NSDictionary
+    
+    // Ensure the returned object is a dictionary
     if ([returnedObject isKindOfClass:[NSDictionary class]]) {
-        NSDictionary *item = (NSDictionary *)returnedObject;
-        
-        accessibilityLabelArray = [self retrieveMaskAccessibilityLabelListFromJSON:item forLogicalPage:logicalPageName];
-        
+        item = (NSDictionary *)returnedObject;
     } else {
-        // Handle cases where the returned object is not an NSDictionary
+        // Log an error if the returned object is not a dictionary
         NSLog(@"Returned object is not an NSDictionary.");
+        return NO;
     }
     
+    // Retrieve masking rules from the configuration dictionary
+    tagRegexArray = [self retrieveMaskAccessibilityListFromJSON:item forLogicalPage:logicalPageName forKey:@"MaskIdList"];
+    valueRegexArray = [self retrieveMaskAccessibilityListFromJSON:item forLogicalPage:logicalPageName forKey:@"MaskValueList"];
+    accessibilityLabelArray = [self retrieveMaskAccessibilityListFromJSON:item forLogicalPage:logicalPageName forKey:@"MaskAccessibilityLabelList"];
+    accessibilityIdArray = [self retrieveMaskAccessibilityListFromJSON:item forLogicalPage:logicalPageName forKey:@"MaskAccessibilityIdList"];
     
-    // Check if accessibilityLabelArray is available and not empty
-    if (accessibilityLabelArray && accessibilityLabelArray.count > 0) {
+    // Check if any of the attributes match the masking rules
+    if ([self willMaskWithAccessibilityHelper:tagRegexArray str:objId] ||
+        [self willMaskWithAccessibilityHelper:valueRegexArray str:text] ||
+        [self willMaskWithAccessibilityHelper:accessibilityIdArray str:accId] ||
+        [self willMaskWithAccessibilityHelper:accessibilityLabelArray str:label]) {
+        return YES; // Masking is required
+    }
+    
+    // Return NO if no match is found
+    return NO;
+}
+
+/**
+ * Determines whether masking should be applied using an accessibility helper.
+ *
+ * @param accArray An array of accessibility-related objects or data used for masking logic.
+ * @param testStr A string parameter that may influence the masking decision.
+ * @return A boolean value indicating whether masking should be applied.
+ */
+- (BOOL)willMaskWithAccessibilityHelper:(NSArray*)accArray str:(NSString*)testStr {
+    if (accArray &&
+        accArray.count > 0 &&
+        testStr != nil) {
         // Iterate through each regex pattern in accessibilityLabelArray
-        for(NSString *regstr in accessibilityLabelArray) {
+        for(NSString *regstr in accArray) {
             // Create NSRegularExpression object from the regex pattern
             NSError *error = nil;
             NSRegularExpression *regExp = [NSRegularExpression regularExpressionWithPattern:regstr options:0 error:&error];
@@ -543,8 +725,8 @@
             }
             
             // Check if the given text matches the regex pattern
-            NSRange textRange = NSMakeRange(0, [label length]);
-            NSRange firstMatch = [regExp rangeOfFirstMatchInString:label options:0 range:textRange];
+            NSRange textRange = NSMakeRange(0, [testStr length]);
+            NSRange firstMatch = [regExp rangeOfFirstMatchInString:testStr options:0 range:textRange];
             
             // Return YES if there's a match, indicating masking is needed
             if (firstMatch.location != NSNotFound) {
@@ -557,7 +739,14 @@
     return NO;
 }
 
-
+/**
+ * Logs a screen view and its layout, including masking rules and screenshots.
+ *
+ * @param screenViewType The type of screen view (e.g., "LOAD", "UNLOAD").
+ * @param referrer The referrer for the screen view.
+ * @param layouts An array of layout entries to process.
+ * @param logicalPageName The logical name of the page.
+ */
 - (void) tlScreenviewAndLayout:(NSString *) screenViewType addRef:(NSString *) referrer addLayouts:(NSArray *) layouts addLogicalPageName: (NSString *) logicalPageName {
     if (referrer == nil) {
         referrer = @"none";
@@ -642,6 +831,11 @@
     [self tlLogMessage:layout addType: @10];
 }
 
+/**
+ * Sets the environment configuration for the screen dimensions.
+ *
+ * @param args A dictionary containing screen width and height.
+ */
 - (void) tlSetEnvironment: (NSDictionary *) args {
     CGSize screenSize = [UIScreen mainScreen].bounds.size;
     NSNumber *width = (NSNumber *) [self checkForParameter:args withKey:@"screenw"];
@@ -655,6 +849,11 @@
     NSLog(@"Flutter screen dimensions, width: %@, height: %@", [width description], [height description]);
 }
 
+/**
+ * Logs an exception event with details such as name, message, stack trace, and whether it was handled.
+ *
+ * @param args A dictionary containing exception details.
+ */
 - (void) tlException: (NSDictionary *) args {
     NSString *name = (NSString *) [self checkForParameter:args withKey:@"name"];
     NSString *message = (NSString *) [self checkForParameter:args withKey:@"message"];
@@ -673,6 +872,11 @@
     [self tlLogMessage:exceptionMessage addType:@6];
 }
 
+/**
+ * Logs a connection event with details such as URL, status code, response size, and timings.
+ *
+ * @param args A dictionary containing connection details.
+ */
 - (void) tlConnection: (NSDictionary *) args {
     NSString *url = (NSString *)[self checkForParameter:args withKey:@"url"];
     int statusCode = (int) [self checkParameterStringAsInteger:args withKey:@"statusCode"];
@@ -698,6 +902,11 @@
     [self tlLogMessage:connectionMessage addType: @3];
 }
 
+/**
+ * Logs a custom event with a specified name and data.
+ *
+ * @param args A dictionary containing event details.
+ */
 - (void) tlCustomEvent: (NSDictionary *) args {
     NSString *eventName = (NSString *) [self checkForParameter:args withKey:@"eventname"];
     NSDictionary *data  = (NSDictionary *)[self checkForParameter:args withKey:@"data"];
@@ -713,6 +922,11 @@
     }
 }
 
+/**
+ * Logs a signal event with specified data and log level.
+ *
+ * @param args A dictionary containing signal details.
+ */
 - (void) tlLogSignal: (NSDictionary *) args {
     NSDictionary *data  = (NSDictionary *)[self checkForParameter:args withKey:@"data"];
     NSNumber *logLevel  = args[@"loglevel"];
@@ -726,6 +940,13 @@
     }
 }
 
+/**
+ * Logs a message with a specified type.
+ *
+ * @param message The message dictionary to log.
+ * @param tlType The type of the message.
+ * @return YES if the message was logged successfully, NO otherwise.
+ */
 - (BOOL) tlLogMessage: (NSDictionary *) message addType: (NSNumber *) tlType {
     [self getScreenViewOffset];
     NSMutableDictionary *baseMessage = [@{@"fromWeb": @(_fromWeb), @"offset": @47, @"screenviewOffset": @(_screenOffset), @"type": @0} mutableCopy];
@@ -740,6 +961,11 @@
     return [[ConnectCustomEvent sharedInstance] logJSONMessagePayloadStr:logMessageString];
 }
 
+/**
+ * Logs a screen view event with a delay to ensure the UI is fully rendered.
+ *
+ * @param args A dictionary containing screen view details.
+ */
 - (void) tlScreenview: (NSDictionary *) args {
   // Delay to ensure UI screen is fully rendered
   double delayInSeconds = 0.5;
@@ -766,13 +992,23 @@
   });
 }
 
-
-
-
+/**
+ * Handles pointer events with the given arguments.
+ *
+ * @param args A dictionary containing the arguments for the pointer event.
+ *             The expected keys and values in the dictionary should be defined
+ *             based on the specific requirements of the pointer event handling.
+ */
 - (void) tlPointerEvent: (NSDictionary *) args {
     [self getPointerEvent:args];
 }
 
+/**
+ * Processes a string to extract specific content based on a regular expression pattern.
+ *
+ * @param inputString The input string to process.
+ * @return The extracted content within parentheses or the first word, or nil if no match is found.
+ */
 NSString *processString(NSString *inputString) {
     NSError *error = nil;
     
@@ -780,6 +1016,7 @@ NSString *processString(NSString *inputString) {
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\(([^)]+)\\)|(\\w+)" options:0 error:&error];
     
     if (!error) {
+        // Find the first match in the input string.
         NSTextCheckingResult *match = [regex firstMatchInString:inputString options:0 range:NSMakeRange(0, [inputString length])];
         if (match) {
             if ([match rangeAtIndex:1].location != NSNotFound) {
@@ -796,12 +1033,27 @@ NSString *processString(NSString *inputString) {
     return nil;
 }
 
-
+/**
+ * Converts the given object to a CGFloat value.
+ *
+ * @param o The object to be converted. It is expected to be a type that can
+ *          be interpreted as a floating-point number, such as NSNumber or NSString.
+ * @return A CGFloat representation of the input object. If the object cannot
+ *         be converted, the behavior should be defined within the implementation.
+ */
 - (CGFloat)getAsFloat:(id)o {
     NSAssert(o != nil, @"Object cannot be nil");
     return [o floatValue];
 }
 
+/**
+ * Retrieves the current state based on the provided layout dictionary.
+ *
+ * @param wLayout A dictionary containing the layout information used to determine the current state.
+ *                 The keys and values in this dictionary should represent layout properties.
+ * @return A dictionary containing the current state information. The keys and values in this dictionary
+ *         represent the state properties derived from the provided layout.
+ */
 - (NSDictionary<NSString *, id> *)getCurrentState:(NSDictionary<NSString *, id> *)wLayout {
     id currStateObject = wLayout[@"currState"];
 
@@ -812,6 +1064,14 @@ NSString *processString(NSString *inputString) {
     return nil;
 }
 
+/**
+ * Retrieves a Position object based on the provided layout dictionary.
+ *
+ * @param wLayout A dictionary containing layout information with keys as NSString
+ *                and values as id. This dictionary is expected to define the layout
+ *                properties required to determine the position.
+ * @return A Position object derived from the layout information provided in the dictionary.
+ */
 - (Position *)getPositionFromLayout:(NSDictionary<NSString *, id> *)wLayout {
     CGFloat pixelDensity = [UIScreen mainScreen].scale;;
     BOOL isMasked = [[NSString stringWithFormat:@"%@", wLayout[@"masked"]] isEqualToString:@"true"];
@@ -844,6 +1104,14 @@ NSString *processString(NSString *inputString) {
     return position;
 }
 
+/**
+ * Converts the given NSString to a float value.
+ *
+ * @param string The NSString to be converted to a float.
+ *               It is expected to contain a valid numeric representation.
+ * @return A float value parsed from the input string.
+ *         If the string cannot be converted, the behavior may depend on the implementation.
+ */
 + (float)getAsFloat:(NSString *)string {
     return [string floatValue];
 }
@@ -853,6 +1121,11 @@ NSString *processString(NSString *inputString) {
     return nil;
 }
 
+/**
+ * Processes gesture events such as swipe and pinch and logs them.
+ *
+ * @param args A dictionary containing gesture event details.
+ */
 - (void) tlGestureEvent: (NSDictionary *) args {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         @try {
@@ -895,22 +1168,22 @@ NSString *processString(NSString *inputString) {
             
             TlImage *tlImage;
             if (maskedScreenshot != nil) {
-                tlImage  = [[TlImage alloc] initWithImage:maskedScreenshot andSize:screenSize andConfig:_basicConfig];
+                tlImage  = [[TlImage alloc] initWithImage:maskedScreenshot andSize:screenSize andConfig:self->_basicConfig];
             } else {
-                tlImage  = [[TlImage alloc] initWithImage:screenshot andSize:screenSize andConfig:_basicConfig];
+                tlImage  = [[TlImage alloc] initWithImage:screenshot andSize:screenSize andConfig:self->_basicConfig];
             }
             
             NSString *originalHash = [tlImage getOriginalHash];
             
-            if ([_lastHash isEqualToString:originalHash]) {
+            if ([self->_lastHash isEqualToString:originalHash]) {
                 NSLog(@"Not logging screenview as unmasked screen has not updated, hash: %@", originalHash);
                 return;
             }
-            _lastHash = originalHash;
+            self->_lastHash = originalHash;
             
             NSString *base64ImageString = tlImage == nil ? @"" : [tlImage getBase64String];
             
-            _lastScreen = base64ImageString.length > 0 ? base64ImageString : _lastScreen;
+            self->_lastScreen = base64ImageString.length > 0 ? base64ImageString : self->_lastScreen;
 
             if (isPinch || isSwipe) {
                 PointerEvent *pointerEvent1, *pointerEvent2;
@@ -941,7 +1214,7 @@ NSString *processString(NSString *inputString) {
                 }
             }
             else {
-                [pointerEvents addObject:_lastMotionUpEvent != nil ? _lastMotionUpEvent : @"Tap"];
+                [pointerEvents addObject:self->_lastMotionUpEvent != nil ? self->_lastMotionUpEvent : @"Tap"];
             }
             
             NSMutableArray *touches = [[NSMutableArray alloc] init];
@@ -955,10 +1228,10 @@ NSString *processString(NSString *inputString) {
                     touch = [[NSMutableArray alloc] init];
                 }
                 
-                CGFloat x      = pointerEvent.x * _scale;
-                CGFloat y      = pointerEvent.y * _scale;
-                CGFloat relX   = x / _screenWidth;
-                CGFloat relY   = y / _screenHeight;
+                CGFloat x      = pointerEvent.x *  self->_scale;
+                CGFloat y      = pointerEvent.y * self->_scale;
+                CGFloat relX   = x /  self->_screenWidth;
+                CGFloat relY   = y / self->_screenHeight;
                 NSString *xy   = [NSString stringWithFormat:@"%f,%f", relX, relY];
                 
                 NSString *type = @"";
@@ -973,8 +1246,8 @@ NSString *processString(NSString *inputString) {
                     },
                     @"control":  @{
                         @"position": @{
-                            @"height": @(_screenHeight),
-                            @"width":  @(_screenWidth),
+                            @"height": @( self->_screenHeight),
+                            @"width":  @(self->_screenWidth),
                             @"relXY":  xy,
                         },
                         @"id":       wid,
@@ -997,15 +1270,15 @@ NSString *processString(NSString *inputString) {
 //            CGSize screenSize = [UIScreen mainScreen].bounds.size;
 //            TlImage *tlImage  = [[TlImage alloc] initWithImage:screenshot andSize:screenSize andConfig:_basicConfig];
 //            NSString *base64ImageString = tlImage == nil ? @"" : [tlImage getBase64String];
-            _lastScreen = base64ImageString;
+            self->_lastScreen = base64ImageString;
 
             NSMutableDictionary *gestureMessage =[@{
                 @"event": [@{
-                    @"type":    isPinch ? @"onScale" : _lastMotionUpEvent != nil ? _lastMotionUpEvent.action : @"Tap",
+                    @"type":    isPinch ? @"onScale" : self->_lastMotionUpEvent != nil ? self->_lastMotionUpEvent.action : @"Tap",
                     @"tlEvent": tlType
                 } mutableCopy],
                 @"touches": touches,
-                @"base64Representation": _lastScreen
+                @"base64Representation": self->_lastScreen
             } mutableCopy];
             
             if (direction != nil) {
@@ -1016,8 +1289,8 @@ NSString *processString(NSString *inputString) {
             
             [self tlLogMessage:gestureMessage addType: @11];
             
-            _lastDown = 0L;
-            _lastMotionUpEvent = _firstMotionEvent = nil;
+            self->_lastDown = 0L;
+            self->_lastMotionUpEvent = self->_firstMotionEvent = nil;
         
         } @catch (NSException *exception) {
             NSLog(@"An exception occurred: %@", exception);
@@ -1025,7 +1298,11 @@ NSString *processString(NSString *inputString) {
     });
 }
 
-
+/**
+ * Logs focus change events for widgets.
+ *
+ * @param args A dictionary containing focus change details.
+ */
 - (void) tlFocusChanged: (NSDictionary *) args {
     @try {
         NSString *wid = (NSString *) [self checkForParameter:args withKey:@"widgetId"];
@@ -1048,6 +1325,12 @@ NSString *processString(NSString *inputString) {
     }
 }
 
+/**
+ * Logs performance events such as navigation timings.
+ *
+ * @param args A dictionary containing performance event details.
+ * @return YES if the performance event was logged successfully, NO otherwise.
+ */
 - (BOOL) tlLogPerformanceEvent: (NSDictionary *) args {
     NSString *type = @"NAVIGATE";
     long redirectCount = [self checkParameterStringAsInteger:args withKey:@"redirectCount"];
@@ -1095,6 +1378,12 @@ NSString *processString(NSString *inputString) {
     return [self tlLogMessage:performanceMessage addType: @7];
 }
 
+/**
+ * Handles method calls from Flutter and routes them to the appropriate native methods.
+ *
+ * @param call The Flutter method call object.
+ * @param result The Flutter result callback.
+ */
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     @try {
         if ([@"getPlatformVersion" caseInsensitiveCompare:call.method] == NSOrderedSame) {
@@ -1201,6 +1490,12 @@ NSString *processString(NSString *inputString) {
     }
 }
 
+/**
+ * Sets a boolean configuration item for a specified key and module.
+ *
+ * @param call The Flutter method call object.
+ * @param result The Flutter result callback.
+ */
 - (void)tlSetBooleanConfigItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
     id value = call.arguments[@"value"];
@@ -1210,6 +1505,12 @@ NSString *processString(NSString *inputString) {
     result(@(success));
 }
 
+/**
+ * Sets a string configuration item for a specified key and module.
+ *
+ * @param call The Flutter method call object.
+ * @param result The Flutter result callback.
+ */
 - (void)tlSetStringItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
     id value = call.arguments[@"value"];
@@ -1219,6 +1520,12 @@ NSString *processString(NSString *inputString) {
     result(@(success));
 }
 
+/**
+ * Sets a number configuration item for a specified key and module.
+ *
+ * @param call The Flutter method call object.
+ * @param result The Flutter result callback.
+ */
 - (void)tlSetNumberItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
     id value = call.arguments[@"value"];
@@ -1228,6 +1535,12 @@ NSString *processString(NSString *inputString) {
     result(@(success));
 }
 
+/**
+ * Retrieves a boolean configuration item for a specified key and module.
+ *
+ * @param call The Flutter method call object.
+ * @param result The Flutter result callback.
+ */
 - (void)tlGetBooleanConfigItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
     NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
@@ -1236,6 +1549,12 @@ NSString *processString(NSString *inputString) {
     result(@(boolValue));
 }
 
+/**
+ * Retrieves a string configuration item for a specified key and module.
+ *
+ * @param call The Flutter method call object.
+ * @param result The Flutter result callback.
+ */
 - (void)tlGetStringItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
     NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
@@ -1265,6 +1584,12 @@ NSString *processString(NSString *inputString) {
     }
 }
 
+/**
+ * Retrieves a number configuration item for a specified key and module.
+ *
+ * @param call The Flutter method call object.
+ * @param result The Flutter result callback.
+ */
 - (void)tlGetNumberItemForKey:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSString *key = (NSString *)[self checkForParameter:call.arguments withKey:@"key"];
     NSString *moduleName = (NSString *)[self checkForParameter:call.arguments withKey:@"moduleName"];
@@ -1273,6 +1598,12 @@ NSString *processString(NSString *inputString) {
     result(numberValue);
 }
 
+/**
+ * Tests and adjusts the module name for compatibility.
+ *
+ * @param moduleName The module name to test.
+ * @return The adjusted module name.
+ */
 - (NSString*)testModuleName:(NSString*)moduleName {
     if ([moduleName caseInsensitiveCompare:@"Tealeaf"] == NSOrderedSame) {
         return moduleName = @"TLFCoreModule";

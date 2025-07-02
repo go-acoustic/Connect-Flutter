@@ -1,19 +1,19 @@
-## 2.36.0
+## 2.35.1-beta
 Beta Connect-Flutter Change Notes: 
 Bug Fixes
 
-- None.
+- Fix issue with masking text in type 10 data.
 
 Improvements
 
-- Support package_info_plus 8.3.0
+- None.
 
 Our environment for this release:
 
 - Flutter SDK 3.27.4
-- Visual Studio Code Version: 1.90.2 (Universal)
-- Xcode 15.4
-- MacOS 15.2
+- Visual Studio Code Version: 1.99.3 (Universal)
+- Xcode 16.4
+- MacOS 15.5
 - iOS 13.x to 18.x
 - Supported architectures:
 	- simulator
@@ -30,6 +30,8 @@ Known Issues
 - Android & IOS platforms are supported.
 - When Navigation route isn't set, replay shows null screenview.
 - Sometimes masking overlay carries to next screen due to Flutter view tree design.
+
+
 ## 2.35.0
 Beta Connect-Flutter Change Notes: 
 Bug Fixes
