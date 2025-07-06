@@ -75,12 +75,12 @@ void updateConnectConfig(
 
 updateConnectLayoutConfig(BasicConfig basicConfig, String currentProjectDir) {
   if (basicConfig.connect?.layoutConfig != null) {
-    bool? useRelease = basicConfig.connect?.useRelease;
+    // bool? useRelease = basicConfig.connect?.useRelease;
 
-    String iosReleasePath =
-        '$currentProjectDir/ios/Pods/AcousticConnectDebug/SDKs/iOS/ConnectResources.bundle/ConnectLayoutConfig.json';
-    String iosDebugPath =
-        '$currentProjectDir/ios/Pods/AcousticConnectDebug/SDKs/iOS/Debug/ConnectResources.bundle/ConnectLayoutConfig.json';
+    // String iosReleasePath =
+    //     '$currentProjectDir/ios/Pods/AcousticConnectDebug/SDKs/iOS/ConnectResources.bundle/ConnectLayoutConfig.json';
+    // String iosDebugPath =
+    //     '$currentProjectDir/ios/Pods/AcousticConnectDebug/SDKs/iOS/Debug/ConnectResources.bundle/ConnectLayoutConfig.json';
 
     JsonEncoder encoder = JsonEncoder.withIndent('  ');
     String prettyprint = encoder.convert(basicConfig.connect!.layoutConfig);
@@ -99,29 +99,29 @@ updateConnectLayoutConfig(BasicConfig basicConfig, String currentProjectDir) {
         stdout.writeln('Updated Android ConnectLayoutConfig.json');
       });
 
-      if (useRelease != null && useRelease) {
-        File oldiOSFile = File(iosReleasePath);
-        if (oldAndroidFile.existsSync()) {
-          oldiOSFile.deleteSync();
-        }
+      // if (useRelease != null && useRelease) {
+      //   File oldiOSFile = File(iosReleasePath);
+      //   if (oldAndroidFile.existsSync()) {
+      //     oldiOSFile.deleteSync();
+      //   }
 
-        File(iosReleasePath).create(recursive: true).then((File file) {
-          file.writeAsString(prettyprint);
-          stdout.writeln('Updated iOS ConnectLayoutConfig.json');
-        });
-      } else if (useRelease != null && !useRelease) {
-        File oldiOSFile = File(iosDebugPath);
-        if (oldiOSFile.existsSync()) {
-          oldiOSFile.deleteSync();
-        }
+      //   File(iosReleasePath).create(recursive: true).then((File file) {
+      //     file.writeAsString(prettyprint);
+      //     stdout.writeln('Updated iOS ConnectLayoutConfig.json');
+      //   });
+      // } else if (useRelease != null && !useRelease) {
+      //   File oldiOSFile = File(iosDebugPath);
+      //   if (oldiOSFile.existsSync()) {
+      //     oldiOSFile.deleteSync();
+      //   }
 
-        File iosFile = File(iosDebugPath);
-        iosFile.createSync(recursive: true);
-        iosFile.writeAsStringSync(prettyprint);
-        stdout.writeln('Updated iOS ConnectLayoutConfig.json (Debug)');
-      } else {
-        stdout.writeln('useRelease property not found');
-      }
+      //   File iosFile = File(iosDebugPath);
+      //   iosFile.createSync(recursive: true);
+      //   iosFile.writeAsStringSync(prettyprint);
+      //   stdout.writeln('Updated iOS ConnectLayoutConfig.json (Debug)');
+      // } else {
+      //   stdout.writeln('useRelease property not found');
+      // }
     } catch (e) {
       stdout.writeln(e);
     }
@@ -130,16 +130,16 @@ updateConnectLayoutConfig(BasicConfig basicConfig, String currentProjectDir) {
   }
 }
 
-void updateFile(String iosDebugPath, String prettyprint) async {
-  // Create the file and ensure it's done before proceeding
-  File file = await File(iosDebugPath).create(recursive: true);
+// void updateFile(String iosDebugPath, String prettyprint) async {
+//   // Create the file and ensure it's done before proceeding
+//   File file = await File(iosDebugPath).create(recursive: true);
 
-  // Write the string to the file
-  await file.writeAsString(prettyprint);
+//   // Write the string to the file
+//   await file.writeAsString(prettyprint);
 
-  // Confirm the update
-  stdout.writeln('Updated iOS ConnectLayoutConfig.json');
-}
+//   // Confirm the update
+//   stdout.writeln('Updated iOS ConnectLayoutConfig.json');
+// }
 
 updateBasicConfig(
     String pluginRoot, String currentProjectDir, String key, dynamic value) {

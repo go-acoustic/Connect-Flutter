@@ -57,7 +57,8 @@ void main(List<String> arguments) async {
   });
 
   stdout.writeln('connect_flutter_plugin configured');
-  stdout.writeln('connect_flutter_plugin running build and pub get for the Flutter app. \n');
+  stdout.writeln(
+      'connect_flutter_plugin running build and pub get for the Flutter app. \n');
 
   // Then, clean and rebuild the Flutter app:
   Process.runSync('flutter', ['build'], runInShell: true);

@@ -41,11 +41,12 @@ A new flutter plugin project uses native SDKs and Flutter code to capture user e
   s.homepage         = pubspec["homepage"] # Homepage from pubspec.yaml
   s.license          = { :file => '../LICENSE' } # License file location
   s.author           = { 'Your Company' => 'email@example.com' }
-  s.platform         = :ios, '13.0' # iOS platform version
+  s.platforms        = { :ios => '13.0', :visionos => '1.0' }
   
   # Source configuration with dynamic version tag
   # s.source           = { :git => repository, :tag => s.version }
   s.source           = { :path => '.' }
+  # s.preserve_paths   = 'ConnectConfig/**/*'
 
   # Define source files and preserve paths
   s.source_files     = 'Classes/**/*'
@@ -58,9 +59,19 @@ A new flutter plugin project uses native SDKs and Flutter code to capture user e
   
   # Target xcconfig for Flutter
   s.pod_target_xcconfig = {
-    'HEADER_SEARCH_PATHS' => '../../../ios/Pods/** ' # Search paths
+    'HEADER_SEARCH_PATHS' => '../../ios/Pods/** ' # Search paths
   }
   
+  s.resource_bundle = {
+    'AcousticConnectConfig' => ['AcousticConnectConfig.json'],
+  }
+  s.resource = 'AcousticConnectConfig.json'
+  s.script_phase = {
+    :name => 'Build Config',
+    :script => %("${PODS_TARGET_SRCROOT}/ConnectConfig/Build_Config.rb" "${PODS_ROOT}" "ConnectConfig.json" "${PODS_TARGET_SRCROOT}"), 
+    :execution_position => :before_compile,
+  }
+
   # Custom script phase for build config.  Don't think we need it, use launch.json prelaunch task instead
   # s.script_phase = {
   #   name: 'Build Config',

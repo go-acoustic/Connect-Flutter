@@ -2,7 +2,7 @@ group 'com.example.connect_flutter_plugin'
 version '1.0'
 
 buildscript {
-    ext.kotlin_version = '1.8.10'
+    ext.kotlin_version = '1.8.22'
 
     repositories {
         google()
@@ -33,8 +33,12 @@ android {
     compileSdk 33
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
     }
 
     defaultConfig {
@@ -44,9 +48,11 @@ android {
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat-resources:1.6.1'
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // Or kotlin-stdlib-jdk8
 
-    implementation 'io.github.go-acoustic:connect:10.4.29'
+    implementation 'io.github.go-acoustic:connect:10.4.48'
 
     // For testing local jars only
     //    implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')

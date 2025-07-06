@@ -25,6 +25,21 @@ allprojects {
         google()
         mavenCentral()
     }
+
+     // BEGIN: Forced version overrides for Kotlin and AppCompat to ensure compatibility with AGP 7.4.2 and JDK 17
+    // These overrides help prevent crashes during D8/R8 transforms and ensure consistent behavior across modules.
+    // To disable, simply comment or remove this block.
+    configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.jetbrains.kotlin') {
+                details.useVersion '1.8.22'
+            }
+            if (details.requested.name == 'appcompat') {
+                details.useVersion '1.6.1'
+            }
+        }
+    }
+    // END: Forced version overrides
 }
 
 rootProject.buildDir = '../build'
@@ -35,9 +50,12 @@ subprojects {
     dependencyLocking {
         ignoredDependencies.add('io.flutter:*')
         lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        if (!project.hasProperty('local-engine-repo')) {
-            lockAllConfigurations()
-        }
+        // Temporarily disabling Gradle dependency locking to allow missing dependencies to resolve.
+        // This fixes issues with packages not listed in the lockfile (e.g., relinker, lifecycle, startup-runtime).
+        // See: https://docs.gradle.org/current/userguide/dependency_locking.html
+        // if (!project.hasProperty('local-engine-repo')) {
+        //     lockAllConfigurations()
+        // }
     }
 }
 
