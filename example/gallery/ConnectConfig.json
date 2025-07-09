@@ -6,11 +6,11 @@
     "useRelease": false,
     "iOSVersion": "",
     "AndroidVersion": "10.4.48",
-    "layoutConfig": {
+    "layoutConfigIos": {
       "AutoLayout": {
         "GlobalScreenSettings": {
           "ScreenChange": true,
-          "DisplayName": "Example",
+          "DisplayName": "ExampleIOS",
           "CaptureLayoutDelay": 500,
           "ScreenShot": true,
           "NumberOfWebViews": 0,
@@ -29,7 +29,73 @@
             },
             "MaskAccessibilityLabelList": [
               "username",
-              "Shrine - Connect masking label"
+              "Shrine - Connect masking label",
+              "mask_label"
+            ]
+          }
+        },
+        "EnabledScreen": {
+          "ScreenChange": true,
+          "DisplayName": "My Home Screen",
+          "Masking": {
+            "HasMasking": true,
+            "HasCustomMask": true,
+            "Sensitive": {
+              "capitalCaseAlphabet": "X",
+              "number": "9",
+              "smallCaseAlphabet": "x",
+              "symbol": "#"
+            },
+            "MaskAccessibilityLabelList": [
+              "privacyLabel",
+              "emailLabel"
+            ]
+          }
+        },
+        "DisabledScreen": {
+          "ScreenChange": false
+        },
+        "/reply": {
+          "ScreenChange": false
+        }
+      },
+      "AppendMapIds": {
+        "[w,9290],[v,0]": {
+          "mid": "ASimpleUIView"
+        },
+        "tag2999999": {
+          "mid": "giveAdditionalId1"
+        },
+        "idxPathValue": {
+          "mid": "giveAdditionalId2"
+        }
+      }
+    },
+    "layoutConfigAndroid": {
+      "AutoLayout": {
+        "GlobalScreenSettings": {
+          "ScreenChange": true,
+          "DisplayName": "ExampleAndroid",
+          "CaptureLayoutDelay": 500,
+          "ScreenShot": true,
+          "NumberOfWebViews": 0,
+          "CaptureUserEvents": true,
+          "CaptureScreenVisits": false,
+          "CaptureLayoutOn": 2,
+          "CaptureScreenshotOn": 2,
+          "Masking": {
+            "HasMasking": true,
+            "HasCustomMask": true,
+            "Sensitive": {
+              "capitalCaseAlphabet": "X",
+              "number": "9",
+              "smallCaseAlphabet": "x",
+              "symbol": "#"
+            },
+            "MaskAccessibilityLabelList": [
+              "username",
+              "Shrine - Connect masking label",
+              "mask_label"
             ]
           }
         },

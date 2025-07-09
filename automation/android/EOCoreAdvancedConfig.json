@@ -6,7 +6,7 @@
     "CompressPostMessage": true,
     "DefaultOrientation": 0,
     "DisableCookieManager": false,
-    "LibraryVersion": "2.0.295",
+    "LibraryVersion": "2.1.16",
     "MaxNumberOfFilesToCache": 5,
     "MessageVersion": "6.0.0.0",
     "OrientationDelayNotificationToModules": 1000,

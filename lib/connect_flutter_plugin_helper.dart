@@ -673,7 +673,9 @@ class TlBinder extends WidgetsBindingObserver {
           }
 
           aStyle = {
-            'textColor': (style.color!.value & 0xFFFFFF).toString(),
+            'textColor': style.color != null
+                ? (style.color!.value & 0xFFFFFF).toString()
+                : '0',
             'textAlphaColor': (style.color?.alpha ?? 0).toString(),
             'textAlphaBGColor': (style.backgroundColor?.alpha ?? 0).toString(),
             'textAlign': align.toString().split('.').last,
@@ -681,11 +683,12 @@ class TlBinder extends WidgetsBindingObserver {
             'paddingTop': top.toInt().toString(),
             'paddingLeft': left.toInt().toString(),
             'paddingRight': right.toInt().toString(),
-            'hidden': (style.color!.opacity == 1.0).toString(),
+            'hidden': (style.color?.opacity == 1.0).toString(),
             'colorPrimary': (style.foreground?.color ?? 0).toString(),
             'colorPrimaryDark': 0.toString(), // TBD: Dark theme??
-            'colorAccent': (style.decorationColor?.value ?? 0)
-                .toString(), // TBD: are this the same??
+            'colorAccent': style.decorationColor != null
+                ? (style.decorationColor!.value & 0xFFFFFF).toString()
+                : '0',
           };
         }
 

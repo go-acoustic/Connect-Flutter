@@ -234,7 +234,7 @@ class ScreenUtil {
             final HashMap<String, Object> currentState = getCurrentState(wLayout);
             final String text = (currentState == null) ? "" : currentState.get("text") + "";
 
-            ConnectFlutterPlugin.LOGGER.log(Level.INFO, "*** Layout -- x: " + x + ", y: " + y + ", text: " + text);
+            // ConnectFlutterPlugin.LOGGER.log(Level.INFO, "*** Layout -- x: " + x + ", y: " + y + ", text: " + text);
 
             position.setRect(rect);
             position.setX(x);
@@ -347,6 +347,8 @@ class ScreenUtil {
                 }
                 
                 baseTarget.setAccessibility(accessibilityForMask);
+            } else {
+                baseTarget.setCurrentState(getCurrentState(wLayout));
             }
 
             if (styleObject instanceof Map) {

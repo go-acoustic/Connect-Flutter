@@ -1,3 +1,39 @@
+## 2.36.3-beta
+Beta Connect-Flutter Change Notes: 
+Bug Fixes
+
+- Minor bug fix.
+- Fix issue with masking text in type 10 data.
+
+Improvements
+
+- Support layoutConfigIos/layoutConfigAndroid as separate LayoutConfig in ConnectConfig.json.
+- Support common custom UI Widgets.
+
+Our environment for this release:
+
+- Flutter SDK 3.27.4
+- Visual Studio Code Version: 1.99.3 (Universal)
+- Xcode 16.4
+- MacOS 15.5
+- iOS 13.x to 18.x
+- Supported architectures:
+	- simulator
+		- arm64
+		- x86_64
+	- device
+		- arm64
+-Android 21-35
+
+
+Known Issues
+
+- Android & IOS platforms are supported.
+- When Navigation route isn't set, replay shows null screenview.
+- Text change event not supported yet.
+- Sometimes masking overlay carries to next screen due to Flutter view tree design.
+
+
 ## 2.35.2-beta
 Beta Connect-Flutter Change Notes: 
 Bug Fixes

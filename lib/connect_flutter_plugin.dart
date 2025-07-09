@@ -153,11 +153,7 @@ class Connect extends StatelessWidget {
     final RenderObject? renderObject = context.findRenderObject();
     if (renderObject is RenderBox) {
       final RenderBox renderBox = renderObject;
-      final Size widgetSize = renderBox.size;
-      print('Widget size: $widgetSize');
-
       final Offset localOffset = renderBox.globalToLocal(position);
-      print(renderBox);
 
       // Perform hit-testing
       final BoxHitTestResult result = BoxHitTestResult();
@@ -271,210 +267,470 @@ Future<List<Map<String, dynamic>>> parseWidgetTree(Element element) async {
   /// All controls excluding the type 10 root node
   final List<Map<String, dynamic>> allControlsList = [];
 
-  // Element parentElement;
-
   try {
     // Recursively parse the widget tree
-    void traverse(Element element, [int depth = 0]) {
-      final widget = element.widget;
-      final type = widget.runtimeType.toString();
+    void traverse(Element element,
+        [int depth = 0, bool insideSemantics = false]) {
+      try {
+        final widget = element.widget;
 
-      /// Build type 10 object
-      if (widget is Semantics ||
-          widget is TextField ||
-          widget is Text ||
-          widget is ElevatedButton ||
-          widget is TextFormField ||
-          widget is TextField ||
-          widget is Checkbox ||
-          widget is CheckboxListTile ||
-          widget is Switch ||
-          widget is SwitchListTile ||
-          widget is Slider ||
-          widget is Radio ||
-          widget is RadioListTile ||
-          widget is DropdownButton ||
-          widget is DropdownMenuItem ||
-          widget is AlertDialog ||
-          widget is SnackBar ||
-          widget is Image ||
-          widget is Icon) {
-        RenderBox? renderObject = element.renderObject as RenderBox?;
+        // Only process widgets that have a render object with size
+        final renderObject = element.renderObject;
+        if (renderObject is RenderBox && renderObject.hasSize) {
+          try {
+            final position = renderObject.localToGlobal(Offset.zero);
+            final size = renderObject.size;
 
-        if (renderObject != null && renderObject.hasSize) {
-          // Access properties or methods specific to RenderBox
+            // Only pass accessibility if we're inside a Semantics widget or this is a Semantics widget
+            final currentAccessibility =
+                (insideSemantics || widget is Semantics) ? accessibility : null;
 
-          // final renderObject = element.renderObject as RenderBox;
-          final position = renderObject.localToGlobal(Offset.zero);
-          final size = renderObject.size;
+            // Parse individual widget and add to results if meaningful
+            final result = _parseIndividualWidget(widget, element, position,
+                size, currentAccessibility, accessiblePositionList);
 
-          Map<String, dynamic>? aStyle;
-          Map<String, dynamic>? font;
-          Map<String, dynamic>? image;
-          String? text = "";
+            // Update accessibility - only Semantics widgets should create new accessibility objects
+            AccessiblePosition? newAccessibility;
 
-          if (widget is Text) {
-            final TextStyle style = widget.style ?? TextStyle();
-            final TextAlign align = widget.textAlign ?? TextAlign.left;
+            if (result != null) {
+              newAccessibility = result['accessibility'] as AccessiblePosition?;
+              accessibility = result['accessibility'] as AccessiblePosition?;
+              final widgetData = result['widgetData'] as Map<String, dynamic>?;
+              final controlData =
+                  result['controlData'] as Map<String, dynamic>?;
 
-            Widget currentWidget = widget;
-            Padding padding;
-
-            font = {
-              'family': style.fontFamily,
-              'size': style.fontSize.toString(),
-              'bold': (style.fontWeight != null &&
-                      FontWeight.values.indexOf(style.fontWeight!) >
-                          FontWeight.values.indexOf(FontWeight.normal))
-                  .toString(),
-              'italic': (style.fontStyle == FontStyle.italic).toString()
-            };
-
-            double top = 0, bottom = 0, left = 0, right = 0;
-
-            /// Get Padding
-            element.visitAncestorElements((ancestor) {
-              currentWidget = ancestor.widget;
-              if (currentWidget is Padding) {
-                padding = currentWidget as Padding;
-
-                if (padding.padding is EdgeInsets) {
-                  final EdgeInsets eig = padding.padding as EdgeInsets;
-                  top = eig.top;
-                  bottom = eig.bottom;
-                  left = eig.left;
-                  right = eig.right;
-                }
-                return false;
+              if (widgetData != null) {
+                widgetTree.add(widgetData);
               }
-              return true;
-            });
 
-            aStyle = {
-              'textColor': ((style.color?.value ?? 0) & 0xFFFFFF).toString(),
-              'textAlphaColor': (style.color?.alpha ?? 0).toString(),
-              'textAlphaBGColor':
-                  (style.backgroundColor?.alpha ?? 0).toString(),
-              'textAlign': align.toString().split('.').last,
-              'paddingBottom': bottom.toInt().toString(),
-              'paddingTop': top.toInt().toString(),
-              'paddingLeft': left.toInt().toString(),
-              'paddingRight': right.toInt().toString(),
-              'hidden': (style.color?.opacity == 1.0).toString(),
-              'colorPrimary': (style.foreground?.color ?? 0).toString(),
-              'colorPrimaryDark': 0.toString(), // TBD: Dark theme??
-              'colorAccent': (style.decorationColor?.value ?? 0).toString(),
-            };
-          }
-
-          /// Get Semantics
-          if (widget is Semantics) {
-            final Semantics semantics = widget;
-
-            if (semantics.properties.label?.isNotEmpty == true ||
-                semantics.properties.label?.isNotEmpty == true) {
-              final String? hint = semantics.properties.hint;
-              final String? label = semantics.properties.label;
-
-              print(
-                  'Connect - Widget is a semantic type: ${semantics.properties}');
-
-              /// Get Accessibility object, and its position for masking purpose
-              accessibility = AccessiblePosition(
-                id: element.toStringShort(),
-                label: label ?? '',
-                hint: hint ?? '',
-                dx: position.dx,
-                dy: position.dy,
-                width: size.width,
-                height: size.height,
-              );
-              accessiblePositionList.add(accessibility);
+              if (controlData != null) {
+                allControlsList.add(controlData);
+              }
             }
-          } else {
-            text = widget is Text ? widget.data : '';
-            final widgetData = {
-              'type': type,
-              'text': text,
-              'position':
-                  'x: ${position.dx}, y: ${position.dy}, width: ${size.width}, height: ${size.height}',
-            };
 
-            // tlLogger.v('WidgetData - ${widget.toString()}');
-
-            widgetTree.add(widgetData);
-
-            Map<String, dynamic> accessibilityMap = {
-              'id': accessibility?.id,
-              'label': accessibility?.label,
-              'hint': accessibility?.hint,
-            };
-
-            final masked = (accessibility != null) ? true : false;
-            final widgetId =
-                widget.runtimeType.toString() + widget.hashCode.toString();
-
-            /// Add the control as map to the list
-            allControlsList.add(<String, dynamic>{
-              'id': widgetId,
-              'cssId': widgetId,
-              'idType': (-4).toString(),
-              // ignore: unnecessary_null_comparison
-              'tlType': (image != null)
-                  ? 'image'
-                  : (text!.contains('\n') ? 'textArea' : 'label'),
-              'type': type,
-              'subType': widget.runtimeType.toString(),
-              'position': <String, String>{
-                'x': position.dx.toInt().toString(),
-                'y': position.dy.toInt().toString(),
-                'width': renderObject.size.width.toInt().toString(),
-                'height': renderObject.size.height.toInt().toString(),
-              },
-              'zIndex': "501",
-              'currState': <String, dynamic>{'text': text, 'font': font},
-              if (aStyle != null) 'style': aStyle,
-              if (accessibility != null) 'accessibility': accessibilityMap,
-              'originalId': "",
-              'masked': '$masked'
-            });
-
-            /// Reset
-            if (accessibility != null) {
+            // Update accessibility - only Semantics widgets should create new accessibility objects
+            if (newAccessibility != null && insideSemantics) {
+              accessibility = newAccessibility;
+            } else {
               accessibility = null;
             }
+
+            // if (accessibility != null &&
+            //     !(insideSemantics || widget is Semantics)) {
+            //   accessibility = null;
+            // }
+          } catch (e) {
+            final widgetType = widget.runtimeType;
+            tlLogger.e(
+                'Failed to process render object for widget $widgetType: $e');
           }
         }
+
+        /// Recursively traverse all children
+        element.visitChildren((child) {
+          try {
+            bool visible = true;
+            if (widget is Visibility) {
+              try {
+                final visibility = widget;
+                if (!visibility.visible) {
+                  visible = false;
+                }
+              } catch (e) {
+                tlLogger.e('Failed to check visibility: $e');
+              }
+            }
+
+            /// Skip invisible Widgets
+            if (visible) {
+              // Pass down the insideSemantics flag - true if we're already inside Semantics or this widget is Semantics
+              traverse(
+                  child, depth + 1, insideSemantics || widget is Semantics);
+            }
+          } catch (e) {
+            tlLogger.e('Failed to traverse child widget: $e');
+          }
+          return;
+        });
+      } catch (e) {
+        final widget = element.widget;
+        final widgetType = widget.runtimeType;
+        tlLogger.e('Failed to parse widget $widgetType: $e');
+        // Continue with next widget instead of crashing
       }
-
-      /// Recursively call to wall down the tree, only Visible children
-      element.visitChildren((child) {
-        bool visible = true;
-        if (widget is Visibility) {
-          final visibility = widget;
-          if (!visibility.visible) {
-            visible = false;
-          }
-        }
-
-        /// Skip invisible Widgets
-        if (visible) {
-          // parentElement = element;
-          // tlLogger.v('Parent widget - $parentElement.');
-
-          traverse(child, depth + 1);
-        }
-        return;
-      });
     }
 
     /// Starting to parse tree
     traverse(element, 0);
   } catch (error) {
     // Handle errors using try-catch block
-    tlLogger.t('Error caught in try-catch: $error');
+    tlLogger.e('Error caught in parseWidgetTree: $error');
   }
+
   return allControlsList;
+}
+
+/// Parses an individual widget and extracts its text, styling, and accessibility information.
+///
+/// Returns a map containing:
+/// - 'accessibility': AccessiblePosition object if semantics found
+/// - 'widgetData': Simple widget data for widgetTree
+/// - 'controlData': Detailed control data for allControlsList
+///
+/// Returns null if the widget has no meaningful content to log or is not explicitly handled.
+Map<String, dynamic>? _parseIndividualWidget(
+  Widget widget,
+  Element element,
+  Offset position,
+  Size size,
+  AccessiblePosition? accessibility,
+  List<AccessiblePosition?> accessiblePositionList,
+) {
+  Map<String, dynamic>? aStyle;
+  Map<String, dynamic>? font;
+  String? text = "";
+
+  ///
+  /// Begin parsing UI Widgets of current screen
+  /// Only widgets explicitly checked in if/else if statements will return data
+  ///
+  if (widget is Semantics) {
+    // Handle Semantics widgets
+    try {
+      final Semantics semantics = widget;
+
+      if (semantics.properties.label?.isNotEmpty == true ||
+          semantics.properties.hint?.isNotEmpty == true) {
+        final String? hint = semantics.properties.hint;
+        final String? label = semantics.properties.label;
+
+        /// Get Accessibility object, and its position for masking purpose
+        accessibility = AccessiblePosition(
+          id: element.toStringShort(),
+          label: label ?? '',
+          hint: hint ?? '',
+          dx: position.dx,
+          dy: position.dy,
+          width: size.width,
+          height: size.height,
+        );
+        accessiblePositionList.add(accessibility);
+
+        // Return data for Semantics widget
+        final widgetId =
+            widget.runtimeType.toString() + widget.hashCode.toString();
+        final controlData = <String, dynamic>{
+          'id': widgetId,
+          'cssId': widgetId,
+          'idType': (-4).toString(),
+          'tlType': 'semantics',
+          'type': widget.runtimeType.toString(),
+          'subType': widget.runtimeType.toString(),
+          'position': <String, String>{
+            'x': position.dx.toInt().toString(),
+            'y': position.dy.toInt().toString(),
+            'width': size.width.toInt().toString(),
+            'height': size.height.toInt().toString(),
+          },
+          'zIndex': "501",
+          'currState': <String, dynamic>{'text': label ?? '', 'font': font},
+          'accessibility': {
+            'id': accessibility.id,
+            'label': accessibility.label,
+            'hint': accessibility.hint,
+          },
+          'originalId': "",
+          'masked': 'true'
+        };
+
+        return {
+          'accessibility': accessibility,
+          'controlData': controlData,
+        };
+      }
+    } catch (e) {
+      tlLogger.e('Failed to parse Semantics widget: $e');
+    }
+  } else if (widget is Text) {
+    try {
+      // Handle Text widgets
+      final TextStyle style = widget.style ?? TextStyle();
+      final TextAlign align = widget.textAlign ?? TextAlign.left;
+
+      Widget currentWidget = widget;
+      Padding? padding;
+
+      font = {
+        'family': style.fontFamily,
+        'size': style.fontSize.toString(),
+        'bold': (style.fontWeight != null &&
+                FontWeight.values.indexOf(style.fontWeight!) >
+                    FontWeight.values.indexOf(FontWeight.normal))
+            .toString(),
+        'italic': (style.fontStyle == FontStyle.italic).toString()
+      };
+
+      double top = 0, bottom = 0, left = 0, right = 0;
+
+      /// Get Padding
+      element.visitAncestorElements((ancestor) {
+        try {
+          currentWidget = ancestor.widget;
+          if (currentWidget is Padding) {
+            padding = currentWidget as Padding;
+
+            if (padding?.padding is EdgeInsets) {
+              final EdgeInsets eig = padding!.padding as EdgeInsets;
+              top = eig.top;
+              bottom = eig.bottom;
+              left = eig.left;
+              right = eig.right;
+            }
+            return false;
+          }
+        } catch (e) {
+          tlLogger.e('Failed to parse ancestor widget: $e');
+        }
+        return true;
+      });
+
+      aStyle = {
+        'textColor': style.color != null
+            ? (style.color!.value & 0xFFFFFF).toString()
+            : '0',
+        'textAlphaColor': (style.color?.alpha ?? 0).toString(),
+        'textAlphaBGColor': (style.backgroundColor?.alpha ?? 0).toString(),
+        'textAlign': align.toString().split('.').last,
+        'paddingBottom': bottom.toInt().toString(),
+        'paddingTop': top.toInt().toString(),
+        'paddingLeft': left.toInt().toString(),
+        'paddingRight': right.toInt().toString(),
+        'hidden': (style.color?.opacity == 1.0).toString(),
+        'colorPrimary': (style.foreground?.color ?? 0).toString(),
+        'colorPrimaryDark': 0.toString(), // TBD: Dark theme??
+        'colorAccent': style.decorationColor != null
+            ? (style.decorationColor!.value & 0xFFFFFF).toString()
+            : '0',
+      };
+
+      if (widget.data != null) {
+        text = widget.data;
+      } else if (widget.textSpan != null) {
+        try {
+          text = _extractTextFromInlineSpan(widget.textSpan!);
+        } catch (e) {
+          tlLogger.e('Failed to extract text from TextSpan: $e');
+          text = '';
+        }
+      } else {
+        text = '';
+      }
+
+      final widgetData = {
+        'type': widget.runtimeType.toString(),
+        'text': text,
+        'position':
+            'x: ${position.dx}, y: ${position.dy}, width: ${size.width}, height: ${size.height}',
+      };
+
+      Map<String, dynamic> accessibilityMap = {
+        'id': accessibility?.id,
+        'label': accessibility?.label,
+        'hint': accessibility?.hint,
+      };
+
+      final masked = (accessibility != null) ? true : false;
+      final widgetId =
+          widget.runtimeType.toString() + widget.hashCode.toString();
+
+      final controlData = <String, dynamic>{
+        'id': widgetId,
+        'cssId': widgetId,
+        'idType': (-4).toString(),
+        'tlType': (text != null && text.contains('\n')) ? 'textArea' : 'label',
+        'type': widget.runtimeType.toString(),
+        'subType': widget.runtimeType.toString(),
+        'position': <String, String>{
+          'x': position.dx.toInt().toString(),
+          'y': position.dy.toInt().toString(),
+          'width': size.width.toInt().toString(),
+          'height': size.height.toInt().toString(),
+        },
+        'zIndex': "501",
+        'currState': <String, dynamic>{'text': text, 'font': font},
+        'style': aStyle,
+        if (accessibility != null) 'accessibility': accessibilityMap,
+        'originalId': "",
+        'masked': '$masked'
+      };
+
+      return {
+        'accessibility': accessibility,
+        'widgetData': widgetData,
+        'controlData': controlData,
+      };
+    } catch (e) {
+      tlLogger.e('Failed to parse Text widget: $e');
+    }
+  } else if (widget is TextFormField || widget is TextField) {
+    try {
+      // Handle TextFormField and TextField by extracting from toString()
+      final String widgetString = widget.toString();
+      final List<String> decorationTexts = [];
+
+      // Extract decoration properties from the widget's string representation
+      try {
+        if (widgetString.contains('labelText:')) {
+          final match =
+              RegExp(r'labelText:\s*([^,}]+)').firstMatch(widgetString);
+          if (match != null) {
+            decorationTexts.add('labelText: ${match.group(1)?.trim()}');
+          }
+        }
+        if (widgetString.contains('hintText:')) {
+          final match =
+              RegExp(r'hintText:\s*([^,}]+)').firstMatch(widgetString);
+          if (match != null) {
+            decorationTexts.add('hintText: ${match.group(1)?.trim()}');
+          }
+        }
+        if (widgetString.contains('helperText:')) {
+          final match =
+              RegExp(r'helperText:\s*([^,}]+)').firstMatch(widgetString);
+          if (match != null) {
+            decorationTexts.add('helperText: ${match.group(1)?.trim()}');
+          }
+        }
+        if (widgetString.contains('prefixText:')) {
+          final match =
+              RegExp(r'prefixText:\s*([^,}]+)').firstMatch(widgetString);
+          if (match != null) {
+            decorationTexts.add('prefixText: ${match.group(1)?.trim()}');
+          }
+        }
+        if (widgetString.contains('suffixText:')) {
+          final match =
+              RegExp(r'suffixText:\s*([^,}]+)').firstMatch(widgetString);
+          if (match != null) {
+            decorationTexts.add('suffixText: ${match.group(1)?.trim()}');
+          }
+        }
+      } catch (e) {
+        tlLogger.e('Failed to parse TextField decoration: $e');
+      }
+
+      if (decorationTexts.isNotEmpty) {
+        text = decorationTexts.join(', ');
+
+        // Return data for TextField/TextFormField widget
+        final widgetId =
+            widget.runtimeType.toString() + widget.hashCode.toString();
+        final controlData = <String, dynamic>{
+          'id': widgetId,
+          'cssId': widgetId,
+          'idType': (-4).toString(),
+          'tlType': 'textField',
+          'type': widget.runtimeType.toString(),
+          'subType': widget.runtimeType.toString(),
+          'position': <String, String>{
+            'x': position.dx.toInt().toString(),
+            'y': position.dy.toInt().toString(),
+            'width': size.width.toInt().toString(),
+            'height': size.height.toInt().toString(),
+          },
+          'zIndex': "501",
+          'currState': <String, dynamic>{'text': text, 'font': font},
+          if (accessibility != null)
+            'accessibility': {
+              'id': accessibility.id,
+              'label': accessibility.label,
+              'hint': accessibility.hint,
+            },
+          'originalId': "",
+          'masked': '${accessibility != null}'
+        };
+
+        return {
+          'accessibility': accessibility,
+          'controlData': controlData,
+        };
+      }
+    } catch (e) {
+      tlLogger.e('Failed to parse TextField/TextFormField: $e');
+    }
+  } else if (widget is ElevatedButton ||
+      widget is TextButton ||
+      widget is OutlinedButton ||
+      widget is FloatingActionButton ||
+      widget is IconButton) {
+    try {
+      String? buttonText;
+      String? buttonType;
+      if (widget is ElevatedButton) {
+        final btn = widget;
+        if (btn.child is Text) {
+          buttonText = (btn.child as Text).data;
+        }
+      } else if (widget is TextButton) {
+        final btn = widget;
+        if (btn.child is Text) {
+          buttonText = (btn.child as Text).data;
+        }
+      } else if (widget is OutlinedButton) {
+        final btn = widget;
+        if (btn.child is Text) {
+          buttonText = (btn.child as Text).data;
+        }
+      } else if (widget is FloatingActionButton) {
+        final btn = widget;
+        if (btn.child is Text) {
+          buttonText = (btn.child as Text).data;
+        } else {
+          // FloatingActionButton with Icon or other child should still be logged
+          buttonText = 'FloatingActionButton';
+        }
+      } else if (widget is IconButton) {
+        // IconButton itself does not have a text label, but may be wrapped in Semantics
+        buttonType = 'IconButton';
+      }
+      buttonType = buttonType ?? widget.runtimeType.toString();
+
+      final controlData = <String, dynamic>{
+        'id': widget.runtimeType.toString() + widget.hashCode.toString(),
+        'cssId': widget.runtimeType.toString() + widget.hashCode.toString(),
+        'idType': (-4).toString(),
+        'tlType': 'button',
+        'type': buttonType,
+        'subType': widget.runtimeType.toString(),
+        'position': <String, String>{
+          'x': position.dx.toInt().toString(),
+          'y': position.dy.toInt().toString(),
+          'width': size.width.toInt().toString(),
+          'height': size.height.toInt().toString(),
+        },
+        'zIndex': "501",
+        'currState': <String, dynamic>{'text': buttonText, 'font': font},
+        if (accessibility != null)
+          'accessibility': {
+            'id': accessibility.id,
+            'label': accessibility.label,
+            'hint': accessibility.hint,
+          },
+        'originalId': "",
+        'masked': '${accessibility != null}'
+      };
+
+      return {
+        'accessibility': accessibility,
+        'controlData': controlData,
+      };
+    } catch (e) {
+      tlLogger.e('Failed to parse button widget: $e');
+    }
+  }
+
+  // Return null for any widget not explicitly handled in the if/else if statements
+  return null;
 }
 
 ///
@@ -1114,4 +1370,22 @@ class PerformanceObserver extends WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _performanceCustomEvent(state);
   }
+}
+
+String _extractTextFromInlineSpan(InlineSpan span) {
+  final StringBuffer buffer = StringBuffer();
+  void extract(InlineSpan span) {
+    if (span is TextSpan) {
+      if (span.text != null) buffer.write(span.text);
+      if (span.children != null) {
+        for (final child in span.children!) {
+          extract(child);
+        }
+      }
+    }
+    // Ignore WidgetSpan for text extraction
+  }
+
+  extract(span);
+  return buffer.toString();
 }

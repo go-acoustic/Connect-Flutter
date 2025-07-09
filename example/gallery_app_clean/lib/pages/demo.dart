@@ -95,7 +95,7 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
 
   bool? _isDesktop;
   bool _showFeatureHighlight = true;
-  late int _demoViewedCount;
+  int _demoViewedCount = 0;
 
   late AnimationController _codeBackgroundColorController;
 

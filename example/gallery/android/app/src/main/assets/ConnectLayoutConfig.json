@@ -21,7 +21,8 @@
         },
         "MaskAccessibilityLabelList": [
           "username",
-          "Shrine - Connect masking label"
+          "Shrine - Connect masking label",
+          "mask_label"
         ]
       }
     },

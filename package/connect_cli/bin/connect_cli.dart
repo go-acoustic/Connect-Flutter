@@ -44,7 +44,7 @@ void main(List<String> arguments) async {
 
   // Update Tealeaf basic config.
   basicConfig.connect!.toJson().forEach((key, value) async {
-    if (key == "layoutConfig") return;
+    if (key == "layoutConfigAndroid") return;
 
     if (key == "AppKey" && appKey != null) {
       value = appKey;

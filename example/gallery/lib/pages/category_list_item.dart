@@ -221,7 +221,7 @@ class _CategoryHeader extends StatelessWidget {
                           )!,
                           style:
                               Theme.of(context).textTheme.headlineSmall!.apply(
-                                    color: colorScheme.onSurface,
+                                    color: colorScheme.surface,
                                   ),
                         ),
                       ),

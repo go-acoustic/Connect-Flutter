@@ -99,8 +99,8 @@ class Connect {
       AndroidVersion = json['AndroidVersion'];
     }
 
-    layoutConfig = json['layoutConfig'] != null
-        ? LayoutConfig.fromJson(json['layoutConfig'])
+    layoutConfig = json['layoutConfigAndroid'] != null
+        ? LayoutConfig.fromJson(json['layoutConfigAndroid'])
         : null;
   }
 
@@ -187,7 +187,7 @@ class Connect {
     }
 
     if (layoutConfig != null) {
-      data['layoutConfig'] = layoutConfig!.toJson();
+      data['layoutConfigAndroid'] = layoutConfig!.toJson();
     }
 
     if (useRelease != null) {

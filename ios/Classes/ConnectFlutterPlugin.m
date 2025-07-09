@@ -86,43 +86,96 @@
     
     [self resetScreenLoadTime];
     
-    // [[ConnectApplicationHelper sharedInstance] enableConnectFramework];
     setenv("EODebug", "1", 1);
     setenv("TLF_DEBUG", "1", 1);
 
+    // Initialize basic properties
+    _lastHash            = @"";
+    _lastDown            = 0L;
+    _lastScreen          = @"";
+    
+    // Disable native SDK auto instrumentation to avoid duplicatation and meta data.
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemAddGestureRecognizerUIButton value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemAddGestureRecognizerUIDatePicker value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemAddGestureRecognizerUIPageControl value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemAddGestureRecognizerUIPickerView value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemAddGestureRecognizerUIScrollView value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemAddGestureRecognizerUISegmentedControl value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemAddGestureRecognizerUISwitch value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemAddGestureRecognizerUITextView value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemDisableAlertAutoCapture value:@"true" forModuleName:kTLFCoreModule];
+
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemSetGestureDetector value:@"false" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:kConfigurableItemLogViewLayoutOnScreenTransition value:@"false" forModuleName:kTLFCoreModule];
+
+    [[EOApplicationHelper sharedInstance] setConfigItem:@"textBox:textChange" value:@"false" forModuleName:kTLFCoreModule];
+
+    [[EOApplicationHelper sharedInstance] setConfigItem:@"gestures" value:@"0" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:@"autolog:FlutterView:click" value:@"0" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:@"autolog:canvas:click" value:@"0" forModuleName:kTLFCoreModule];
+    [[EOApplicationHelper sharedInstance] setConfigItem:@"canvas:click" value:@"0" forModuleName:kTLFCoreModule];
+    
+    [self loadConnectConfig];
+    
     ConnectApplicationHelper *ConnectApplicationHelperObj = [[ConnectApplicationHelper alloc] init];
-        [ConnectApplicationHelperObj enableFramework];
+    [ConnectApplicationHelperObj enableFramework];
 
     NSLog(@"Connect Enabled: %@", [[ConnectApplicationHelper sharedInstance] isTLFEnabled] ? @"Yes" : @"No");
-    NSLog(@"Device Pixel Density (scale): %f", _scale);
-    
+    NSLog(@"Device Pixel Density (scale): %f", self->_scale);
     
     NSString *mainPath   = [[NSBundle mainBundle] pathForResource:@"ConnectResources" ofType:@"bundle"];
     NSBundle *bundlePath = [[NSBundle alloc] initWithPath:mainPath];
     NSString *filePath   = [bundlePath pathForResource:@"ConnectBasicConfig" ofType:@"plist"];
-    _basicConfig         = [NSMutableDictionary dictionaryWithContentsOfFile:filePath];
-    _layoutConfig        = [self getLayoutConfig];
+    self->_basicConfig   = [NSMutableDictionary dictionaryWithContentsOfFile:filePath];
+    self->_layoutConfig  = [self getLayoutConfig];
     
-    _lastHash            = @"";
-    _imageFormat         = [self getBasicConfig][@"ScreenshotFormat"];
-    _isJpgFormat         = [_imageFormat caseInsensitiveCompare:@"JPG"] == NSOrderedSame ||
-                           [_imageFormat caseInsensitiveCompare:@"JPEG"] == NSOrderedSame;
-    _mimeType            = _isJpgFormat ? @"jpg" : @"png";
+    self->_imageFormat   = [self getBasicConfig][@"ScreenshotFormat"];
+    self->_isJpgFormat   = [self->_imageFormat caseInsensitiveCompare:@"JPG"] == NSOrderedSame ||
+                            [self->_imageFormat caseInsensitiveCompare:@"JPEG"] == NSOrderedSame;
+    self->_mimeType      = self->_isJpgFormat ? @"jpg" : @"png";
     
-    _imageAttributes     = @{
-                            @"format":      _imageFormat,
-                            @"isJpg":       @(_isJpgFormat),
-                            @"scale":       @(_scale),
-                            @"@mimeType":   (_isJpgFormat ? @"jpg" : @"png"),
-                            @"%screenSize": @([_basicConfig[@"PercentOfScreenshotsSize"] floatValue]),
-                            @"%compress":   @([_basicConfig[@"PercentToCompressImage"] floatValue] / 100.0)
+    self->_imageAttributes = @{
+                            @"format":      self->_imageFormat,
+                            @"isJpg":       @(self->_isJpgFormat),
+                            @"scale":       @(self->_scale),
+                            @"@mimeType":   (self->_isJpgFormat ? @"jpg" : @"png"),
+                            @"%screenSize": @([self->_basicConfig[@"PercentOfScreenshotsSize"] floatValue]),
+                            @"%compress":   @([self->_basicConfig[@"PercentToCompressImage"] floatValue] / 100.0)
                             };
-    
-    _lastDown            = 0L;
-    _lastScreen          = @"";
     
     return self;
 }
+
+
+- (void)loadConnectConfig {
+    NSArray *eocoreKeys = @[@"CachingLevel", @"DoPostAppComesFromBackground", @"DoPostAppGoesToBackground", @"DoPostAppGoesToClose", @"DoPostAppIsLaunched", @"DoPostOnIntervals", @"DynamicConfigurationEnabled", @"HasToPersistLocalCache", @"LoggingLevel", @"ManualPostEnabled", @"PostMessageLevelCellular", @"PostMessageLevelWiFi", @"PostMessageTimeIntervals", @"CachedFileMaxBytesSize", @"CompressPostMessage", @"DefaultOrientation", @"LibraryVersion", @"MaxNumberOfFilesToCache", @"MessageVersion", @"PostMessageMaxBytesSize", @"PostMessageTimeout",@"TurnOffCorrectOrientationUpdates"];
+    NSArray *tealeafKeys = @[@"AppKey", @"DisableAutoInstrumentation", @"GetImageDataOnScreenLayout", @"JavaScriptInjectionDelay", @"KillSwitchEnabled", @"KillSwitchMaxNumberOfTries",@"KillSwitchTimeInterval", @"KillSwitchTimeout", @"KillSwitchUrl", @"UseWhiteList", @"WhiteListParam", @"LogLocationEnabled", @"MaxStringsLength", @"PercentOfScreenshotsSize", @"PercentToCompressImage", @"ScreenShotPixelDensity", @"PostMessageUrl", @"DoPostOnScreenChange", @"printScreen", @"ScreenshotFormat", @"SessionTimeout", @"SessionizationCookieName", @"CookieSecure", @"disableTLTDID",@"SetGestureDetector", @"AddGestureRecognizerUIButton", @"AddGestureRecognizerUIDatePicker", @"AddGestureRecognizerUIPageControl", @"AddGestureRecognizerUIPickerView", @"AddGestureRecognizerUIScrollView", @"AddGestureRecognizerUISegmentedControl", @"AddGestureRecognizerUISwitch", @"AddGestureRecognizerUITextView", @"AddGestureRecognizerWKWebView", @"AddMessageTypeHeader", @"DisableAlertAutoCapture", @"DisableAlertBackgroundForDisabledLogViewLayout", @"DisableKeyboardCapture", @"EnableWebViewInjectionForDisabledAutoCapture", @"FilterMessageTypes", @"InitialZIndex", @"IpPlaceholder", @"LibraryVersion", @"LogFullRequestResponsePayloads", @"LogViewLayoutOnScreenTransition", @"MessageTypeHeader", @"MessageTypes", @"RemoveIp", @"RemoveSwiftUIDuplicates", @"SubViewArrayZIndexIncrementTrigger", @"SwiftUICaptureNonVariadic", @"TextFieldBeingEditedUseSender", @"TreatJsonDictionariesAsString", @"UICPayload", @"UIKeyboardCaptureTouches", @"UseJPGForReplayImagesExtension", @"UseXpathId", @"actionSheet:buttonIndex", @"actionSheet:show", @"alertView:buttonIndex", @"alertView:show", @"autolog:pageControl", @"autolog:textBox:_searchFieldEndEditing", @"button:click", @"button:load", @"canvas:click", @"connection", @"customEvent", @"datePicker:dateChange", @"exception", @"gestures", @"label:load", @"label:textChange", @"layout", @"location", @"mobileState", @"orientation", @"pageControl:valueChanged", @"pickerView:valueChanged", @"screenChangeLevel", @"scroller:scrollChange", @"selectList:UITableViewSelectionDidChangeNotification", @"selectList:load", @"selectList:valueChange", @"slider:valueChange", @"stepper:valueChange", @"textBox:_searchFieldBeginChanged", @"textBox:_searchFieldBeginEditing", @"textBox:_searchFieldEditingChanged", @"textBox:textChange", @"textBox:textChanged", @"textBox:textFieldDidChange", @"toggleButton:click"];
+    
+    NSBundle *bundle = [NSBundle bundleForClass:self.classForCoder];
+    NSURL *bundleURL = [[bundle resourceURL] URLByAppendingPathComponent:@"AcousticConnectConfig.bundle"];
+    NSBundle *resourceBundle = [NSBundle bundleWithURL:bundleURL];
+    NSString *path = [resourceBundle pathForResource:@"AcousticConnectConfig" ofType:@"json"];
+    NSData *data = [NSData dataWithContentsOfFile:path];
+    NSDictionary *jsonData = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
+    
+    if (jsonData != nil) {
+        NSDictionary *connectData = [jsonData objectForKey:@"Connect"];
+        for (NSString* key in connectData) {
+            id value = connectData[key];
+            
+            if ([tealeafKeys containsObject:key]) {
+                [[EOApplicationHelper sharedInstance] setConfigItem:key value:value forModuleName:kTLFCoreModule];
+            } else if ([eocoreKeys containsObject:key]) {
+                [[EOApplicationHelper sharedInstance] setConfigItem:key value:value forModuleName:kEOCoreModule];
+            } else if ([key isEqualToString:@"layoutConfigIos"]) {
+                [[EOApplicationHelper sharedInstance] setConfigItem:@"AutoLayout" value:[(NSDictionary*)value objectForKey:@"AutoLayout"] forModuleName:kTLFCoreModule];
+                [[EOApplicationHelper sharedInstance] setConfigItem:@"AppendMapIds" value:[(NSDictionary*)value objectForKey:@"AppendMapIds"] forModuleName:kTLFCoreModule];
+            }
+        }
+    }
+    
+}
+
 
 /**
  * Retrieves the current screen orientation.
