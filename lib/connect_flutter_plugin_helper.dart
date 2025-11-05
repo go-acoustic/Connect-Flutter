@@ -1173,6 +1173,10 @@ class ConnectHelper {
   ///
   /// Returns a [String] representing the updated logical page name.
   static String updateLogicalPageName(String screenName, String jsonString) {
+    tlLogger.t(
+      'ConnectHelper.updateLogicalPageName - Original logicalPageName:$screenName',
+    );
+
     if (jsonString.isEmpty) {
       return screenName;
     }
@@ -1181,6 +1185,9 @@ class ConnectHelper {
     final Map<String, dynamic> jsonConfig = jsonDecode(jsonString);
     if (jsonConfig.containsKey(screenName)) {
       screenName = jsonConfig[screenName]['DisplayName'] ?? screenName;
+    } else if (jsonConfig.containsKey('GlobalScreenSettings')) {
+      screenName =
+          jsonConfig['GlobalScreenSettings']['DisplayName'] ?? screenName;
     }
 
     return screenName;

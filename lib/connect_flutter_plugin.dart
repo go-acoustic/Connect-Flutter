@@ -204,6 +204,10 @@ class LoggingNavigatorObserver extends NavigatorObserver {
       return route.settings.name!;
     }
 
+    tlLogger.t(
+      'PluginConnect._getRouteName - Missing:route.settings.name. Will adjust based on route type.',
+    );
+
     // Handle different route types
     final String routeType = route.runtimeType.toString();
 
