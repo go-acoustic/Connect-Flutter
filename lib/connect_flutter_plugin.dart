@@ -32,8 +32,8 @@ class Connect extends StatelessWidget {
   ///
   /// The [child] parameter is the widget to which the [Connect] is applied.
   Connect({Key? key, required this.child})
-      : rootWidget = child,
-        super(key: key);
+    : rootWidget = child,
+      super(key: key);
 
   static void init() {
     startTime = DateTime.now().millisecondsSinceEpoch;
@@ -54,7 +54,8 @@ class Connect extends StatelessWidget {
     Widget? widget = context.widget;
 
     tlLogger.t(
-        'GestureDetector Build WIDGET: ${widget.runtimeType.toString()} ${widget.hashCode}');
+      'GestureDetector Build WIDGET: ${widget.runtimeType.toString()} ${widget.hashCode}',
+    );
 
     final WidgetPath wp = WidgetPath.create(context, hash: true);
     wp.addInstance(widget.hashCode);
@@ -65,15 +66,19 @@ class Connect extends StatelessWidget {
         if (notification is ScrollStartNotification) {
           final ScrollStartNotification scrollStartNotification = notification;
           final DragStartDetails? details = scrollStartNotification.dragDetails;
-          TlBinder()
-              .startScroll(details?.globalPosition, details?.sourceTimeStamp);
+          TlBinder().startScroll(
+            details?.globalPosition,
+            details?.sourceTimeStamp,
+          );
         } else if (notification is ScrollUpdateNotification) {
           final ScrollUpdateNotification scrollUpdateNotification =
               notification;
           final DragUpdateDetails? details =
               scrollUpdateNotification.dragDetails;
-          TlBinder()
-              .updateScroll(details?.globalPosition, details?.sourceTimeStamp);
+          TlBinder().updateScroll(
+            details?.globalPosition,
+            details?.sourceTimeStamp,
+          );
         } else if (notification is ScrollEndNotification) {
           final ScrollEndNotification scrollEndNotification = notification;
           final DragEndDetails? details = scrollEndNotification.dragDetails;
@@ -94,21 +99,26 @@ class Connect extends StatelessWidget {
               Connect.startTime = DateTime.now().millisecondsSinceEpoch;
 
               if (ConnectHelper.captureScreen) {
-                logWidgetTree().then((result) async {
-                  var touchedTarget =
-                      findTouchedWidget(context, details.position);
+                logWidgetTree()
+                    .then((result) async {
+                      var touchedTarget = findTouchedWidget(
+                        context,
+                        details.position,
+                      );
 
-                  // Handle onTap gesture and Pass the result to Connect plugin
-                  await PluginConnect.onTlGestureEvent(
-                      gesture: "tap",
-                      id: wp.widgetPath(),
-                      target: touchedTarget,
-                      data: null,
-                      layoutParameters: result);
-                }).catchError((error) {
-                  // Handle errors if the async function throws an error
-                  tlLogger.e('Error: $error');
-                });
+                      // Handle onTap gesture and Pass the result to Connect plugin
+                      await PluginConnect.onTlGestureEvent(
+                        gesture: "tap",
+                        id: wp.widgetPath(),
+                        target: touchedTarget,
+                        data: null,
+                        layoutParameters: result,
+                      );
+                    })
+                    .catchError((error) {
+                      // Handle errors if the async function throws an error
+                      tlLogger.e('Error: $error');
+                    });
               }
             }
           },
@@ -116,8 +126,9 @@ class Connect extends StatelessWidget {
             ConnectHelper.pointerEventHelper("DOWN", details);
           },
           onPointerMove: (details) {
-            tlLogger
-                .t("Gesture move, swipe event checkForScroll() will fire..");
+            tlLogger.t(
+              "Gesture move, swipe event checkForScroll() will fire..",
+            );
             ConnectHelper.pointerEventHelper("MOVE", details);
           },
           child: child,
@@ -130,7 +141,8 @@ class Connect extends StatelessWidget {
   /// Converts erorr details
   ///
   static Map<String, dynamic> flutterErrorDetailsToMap(
-      FlutterErrorDetails details) {
+    FlutterErrorDetails details,
+  ) {
     return {
       'message': details.exception.toString(),
       'exceptionType': details.exception.runtimeType.toString(),
@@ -147,7 +159,9 @@ class Connect extends StatelessWidget {
   ///
   /// Since the results are just a list of RenderObjects, we'll need to parse the Widget info.
   static String findTouchedWidget(
-      final BuildContext context, final Offset position) {
+    final BuildContext context,
+    final Offset position,
+  ) {
     String jsonString = "";
 
     final RenderObject? renderObject = context.findRenderObject();
@@ -183,6 +197,37 @@ class LoggingNavigatorObserver extends NavigatorObserver {
   /// Constructs a [LoggingNavigatorObserver].
   LoggingNavigatorObserver() : super();
 
+  /// Helper function to extract a meaningful route name from various route types
+  String _getRouteName(Route<dynamic> route) {
+    // First, try to get the name from route settings
+    if (route.settings.name != null && route.settings.name!.isNotEmpty) {
+      return route.settings.name!;
+    }
+
+    // Handle different route types
+    final String routeType = route.runtimeType.toString();
+
+    // For ModalBottomSheetRoute and similar routes, use the route type
+    if (routeType.contains('ModalBottomSheetRoute')) {
+      return 'ModalBottomSheet';
+    }
+
+    if (routeType.contains('DialogRoute')) {
+      return 'Dialog';
+    }
+
+    if (routeType.contains('PopupRoute')) {
+      return 'Popup';
+    }
+
+    if (routeType.contains('PageRoute')) {
+      return 'Page_${route.hashCode}';
+    }
+
+    // For any other route type, use the runtime type with hash
+    return '${routeType}_${route.hashCode}';
+  }
+
   /// Called when a route is pushed onto the navigator.
   ///
   /// The `route` parameter represents the route being pushed onto the navigator.
@@ -193,24 +238,40 @@ class LoggingNavigatorObserver extends NavigatorObserver {
       final endTime = DateTime.now().millisecondsSinceEpoch;
       final int duration = endTime - Connect.startTime;
 
-      final logicalPageName = route.settings.name.toString();
+      var logicalPageName = _getRouteName(route);
       ConnectHelper.currentLogicalPageName = logicalPageName;
 
+      tlLogger.t(
+        'PluginConnect.didPush - Pushed original route name: $logicalPageName',
+      );
+
       // Load AutoLayout JSON configuration
-      final jsonString =
-          PluginConnect.getStringItemForKey('AutoLayout', 'Tealeaf');
+      final jsonString = PluginConnect.getStringItemForKey(
+        'AutoLayout',
+        'Tealeaf',
+      );
       // tlLogger.d('PluginConnect getStringItemForKey: $jsonString');
-      jsonString.then((result) {
-        if (result != null &&
-            ConnectHelper.canCaptureScreen(logicalPageName, result)) {
-          /// Calls Connect plugin to log the screen layout
-          PluginConnect.logScreenLayout(logicalPageName);
-          tlLogger.t(
-              'PluginConnect.logScreenLayout - Pushed ${route.settings.name}');
-        }
-      }).catchError((error) {
-        tlLogger.e('Error: $error');
-      });
+      jsonString
+          .then((result) {
+            if (result != null &&
+                ConnectHelper.canCaptureScreen(logicalPageName, result)) {
+              // Fix up name
+              logicalPageName = ConnectHelper.updateLogicalPageName(
+                logicalPageName,
+                result,
+              );
+              ConnectHelper.currentLogicalPageName = logicalPageName;
+
+              /// Calls Connect plugin to log the screen layout
+              PluginConnect.logScreenLayout(logicalPageName);
+              tlLogger.t(
+                'PluginConnect.logScreenLayout - Pushed $logicalPageName',
+              );
+            }
+          })
+          .catchError((error) {
+            tlLogger.e('Error: $error');
+          });
 
       PluginConnect.logPerformanceEvent(
         loadEventStart: 0,
@@ -225,11 +286,14 @@ class LoggingNavigatorObserver extends NavigatorObserver {
   /// The `previousRoute` parameter represents the route that will now be on top of the navigator.
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    PluginConnect.logScreenViewContextUnLoad(route.settings.name.toString(),
-        previousRoute != null ? previousRoute.settings.name.toString() : "");
+    final routeName = _getRouteName(route);
+    final previousRouteName = previousRoute != null
+        ? _getRouteName(previousRoute)
+        : "";
 
-    tlLogger.t(
-        'PluginConnect.logScreenViewContextUnLoad -Popped ${route.settings.name}');
+    PluginConnect.logScreenViewContextUnLoad(routeName, previousRouteName);
+
+    tlLogger.t('PluginConnect.logScreenViewContextUnLoad -Popped $routeName');
   }
 }
 
@@ -269,8 +333,11 @@ Future<List<Map<String, dynamic>>> parseWidgetTree(Element element) async {
 
   try {
     // Recursively parse the widget tree
-    void traverse(Element element,
-        [int depth = 0, bool insideSemantics = false]) {
+    void traverse(
+      Element element, [
+      int depth = 0,
+      bool insideSemantics = false,
+    ]) {
       try {
         final widget = element.widget;
 
@@ -286,8 +353,14 @@ Future<List<Map<String, dynamic>>> parseWidgetTree(Element element) async {
                 (insideSemantics || widget is Semantics) ? accessibility : null;
 
             // Parse individual widget and add to results if meaningful
-            final result = _parseIndividualWidget(widget, element, position,
-                size, currentAccessibility, accessiblePositionList);
+            final result = _parseIndividualWidget(
+              widget,
+              element,
+              position,
+              size,
+              currentAccessibility,
+              accessiblePositionList,
+            );
 
             // Update accessibility - only Semantics widgets should create new accessibility objects
             AccessiblePosition? newAccessibility;
@@ -322,7 +395,8 @@ Future<List<Map<String, dynamic>>> parseWidgetTree(Element element) async {
           } catch (e) {
             final widgetType = widget.runtimeType;
             tlLogger.e(
-                'Failed to process render object for widget $widgetType: $e');
+              'Failed to process render object for widget $widgetType: $e',
+            );
           }
         }
 
@@ -345,7 +419,10 @@ Future<List<Map<String, dynamic>>> parseWidgetTree(Element element) async {
             if (visible) {
               // Pass down the insideSemantics flag - true if we're already inside Semantics or this widget is Semantics
               traverse(
-                  child, depth + 1, insideSemantics || widget is Semantics);
+                child,
+                depth + 1,
+                insideSemantics || widget is Semantics,
+              );
             }
           } catch (e) {
             tlLogger.e('Failed to traverse child widget: $e');
@@ -440,13 +517,10 @@ Map<String, dynamic>? _parseIndividualWidget(
             'hint': accessibility.hint,
           },
           'originalId': "",
-          'masked': 'true'
+          'masked': 'true',
         };
 
-        return {
-          'accessibility': accessibility,
-          'controlData': controlData,
-        };
+        return {'accessibility': accessibility, 'controlData': controlData};
       }
     } catch (e) {
       tlLogger.e('Failed to parse Semantics widget: $e');
@@ -463,11 +537,12 @@ Map<String, dynamic>? _parseIndividualWidget(
       font = {
         'family': style.fontFamily,
         'size': style.fontSize.toString(),
-        'bold': (style.fontWeight != null &&
-                FontWeight.values.indexOf(style.fontWeight!) >
-                    FontWeight.values.indexOf(FontWeight.normal))
-            .toString(),
-        'italic': (style.fontStyle == FontStyle.italic).toString()
+        'bold':
+            (style.fontWeight != null &&
+                    FontWeight.values.indexOf(style.fontWeight!) >
+                        FontWeight.values.indexOf(FontWeight.normal))
+                .toString(),
+        'italic': (style.fontStyle == FontStyle.italic).toString(),
       };
 
       double top = 0, bottom = 0, left = 0, right = 0;
@@ -561,7 +636,7 @@ Map<String, dynamic>? _parseIndividualWidget(
         'style': aStyle,
         if (accessibility != null) 'accessibility': accessibilityMap,
         'originalId': "",
-        'masked': '$masked'
+        'masked': '$masked',
       };
 
       return {
@@ -581,36 +656,41 @@ Map<String, dynamic>? _parseIndividualWidget(
       // Extract decoration properties from the widget's string representation
       try {
         if (widgetString.contains('labelText:')) {
-          final match =
-              RegExp(r'labelText:\s*([^,}]+)').firstMatch(widgetString);
+          final match = RegExp(
+            r'labelText:\s*([^,}]+)',
+          ).firstMatch(widgetString);
           if (match != null) {
             decorationTexts.add('labelText: ${match.group(1)?.trim()}');
           }
         }
         if (widgetString.contains('hintText:')) {
-          final match =
-              RegExp(r'hintText:\s*([^,}]+)').firstMatch(widgetString);
+          final match = RegExp(
+            r'hintText:\s*([^,}]+)',
+          ).firstMatch(widgetString);
           if (match != null) {
             decorationTexts.add('hintText: ${match.group(1)?.trim()}');
           }
         }
         if (widgetString.contains('helperText:')) {
-          final match =
-              RegExp(r'helperText:\s*([^,}]+)').firstMatch(widgetString);
+          final match = RegExp(
+            r'helperText:\s*([^,}]+)',
+          ).firstMatch(widgetString);
           if (match != null) {
             decorationTexts.add('helperText: ${match.group(1)?.trim()}');
           }
         }
         if (widgetString.contains('prefixText:')) {
-          final match =
-              RegExp(r'prefixText:\s*([^,}]+)').firstMatch(widgetString);
+          final match = RegExp(
+            r'prefixText:\s*([^,}]+)',
+          ).firstMatch(widgetString);
           if (match != null) {
             decorationTexts.add('prefixText: ${match.group(1)?.trim()}');
           }
         }
         if (widgetString.contains('suffixText:')) {
-          final match =
-              RegExp(r'suffixText:\s*([^,}]+)').firstMatch(widgetString);
+          final match = RegExp(
+            r'suffixText:\s*([^,}]+)',
+          ).firstMatch(widgetString);
           if (match != null) {
             decorationTexts.add('suffixText: ${match.group(1)?.trim()}');
           }
@@ -647,13 +727,10 @@ Map<String, dynamic>? _parseIndividualWidget(
               'hint': accessibility.hint,
             },
           'originalId': "",
-          'masked': '${accessibility != null}'
+          'masked': '${accessibility != null}',
         };
 
-        return {
-          'accessibility': accessibility,
-          'controlData': controlData,
-        };
+        return {'accessibility': accessibility, 'controlData': controlData};
       }
     } catch (e) {
       tlLogger.e('Failed to parse TextField/TextFormField: $e');
@@ -717,13 +794,10 @@ Map<String, dynamic>? _parseIndividualWidget(
             'hint': accessibility.hint,
           },
         'originalId': "",
-        'masked': '${accessibility != null}'
+        'masked': '${accessibility != null}',
       };
 
-      return {
-        'accessibility': accessibility,
-        'controlData': controlData,
-      };
+      return {'accessibility': accessibility, 'controlData': controlData};
     } catch (e) {
       tlLogger.e('Failed to parse button widget: $e');
     }
@@ -737,20 +811,21 @@ Map<String, dynamic>? _parseIndividualWidget(
 /// Connect Log Exception.
 ///
 class ConnectException implements Exception {
-  ConnectException.create(
-      {required int code,
-      required this.msg,
-      this.nativeMsg,
-      this.nativeStacktrace,
-      this.nativeDetails}) {
+  ConnectException.create({
+    required int code,
+    required this.msg,
+    this.nativeMsg,
+    this.nativeStacktrace,
+    this.nativeDetails,
+  }) {
     this.code = _getCode(code);
   }
 
   ConnectException(PlatformException pe, {this.msg})
-      : code = pe.code,
-        nativeStacktrace = pe.stacktrace,
-        nativeMsg = pe.message,
-        nativeDetails = pe.details?.toString();
+    : code = pe.code,
+      nativeStacktrace = pe.stacktrace,
+      nativeMsg = pe.message,
+      nativeDetails = pe.details?.toString();
 
   static String logErrorMsg = 'Error logging an exception';
   static int codeBase = 600;
@@ -778,8 +853,10 @@ class PluginConnect {
     try {
       return await _channel.invokeMethod('getPlatformVersion');
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process platform version request message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process platform version request message!',
+      );
     }
   }
 
@@ -789,20 +866,25 @@ class PluginConnect {
       tlLogger.t("Connect version: $version");
       return version;
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process Connect request version message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process Connect request version message!',
+      );
     }
   }
 
   static Future<String> get connectSessionId async {
     try {
-      final String sessionId =
-          await _channel.invokeMethod('getConnectSessionId');
+      final String sessionId = await _channel.invokeMethod(
+        'getConnectSessionId',
+      );
       tlLogger.t("Connect sessionId: $sessionId");
       return sessionId;
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process Connect request sessionId message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process Connect request sessionId message!',
+      );
     }
   }
 
@@ -814,7 +896,9 @@ class PluginConnect {
       return "2.0.0";
     } on Exception catch (e) {
       throw ConnectException.create(
-          code: 7, msg: 'Unable to obtain platform version: ${e.toString()}');
+        code: 7,
+        msg: 'Unable to obtain platform version: ${e.toString()}',
+      );
     }
   }
 
@@ -822,19 +906,27 @@ class PluginConnect {
     try {
       return await _channel.invokeMethod('getAppKey');
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process app key request message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process app key request message!',
+      );
     }
   }
 
-  static Future<void> tlSetEnvironment(
-      {required int screenWidth, required int screenHeight}) async {
+  static Future<void> tlSetEnvironment({
+    required int screenWidth,
+    required int screenHeight,
+  }) async {
     try {
-      await _channel.invokeMethod(
-          'setenv', {'screenw': screenWidth, 'screenh': screenHeight});
+      await _channel.invokeMethod('setenv', {
+        'screenw': screenWidth,
+        'screenh': screenHeight,
+      });
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to send Flutter screen parameters message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to send Flutter screen parameters message!',
+      );
     }
   }
 
@@ -848,14 +940,15 @@ class PluginConnect {
   /// [loadTime]: Optional time at which the network response was received.
   /// [responseTime]: Optional time it took to receive the network response,
   ///   calculated as `loadTime - initTime` if not provided.
-  static Future<void> tlConnection(
-      {required String url,
-      required int statusCode,
-      String description = '',
-      int responseSize = 0,
-      int initTime = 0,
-      int loadTime = 0,
-      responseTime = 0}) async {
+  static Future<void> tlConnection({
+    required String url,
+    required int statusCode,
+    String description = '',
+    int responseSize = 0,
+    int initTime = 0,
+    int loadTime = 0,
+    responseTime = 0,
+  }) async {
     if (responseTime == 0) {
       responseTime = loadTime - initTime;
     }
@@ -867,7 +960,7 @@ class PluginConnect {
         'initTime': initTime.toString(),
         'loadTime': loadTime.toString(),
         'responseTime': responseTime.toString(),
-        'description': description
+        'description': description,
       });
     } on PlatformException catch (pe) {
       throw ConnectException(pe, msg: 'Unable to process connection message!');
@@ -914,46 +1007,55 @@ class PluginConnect {
         'data': customData,
       });
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process custom event message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process custom event message!',
+      );
     }
   }
 
   ///
   /// For Application level handled exception
   ///
-  static Future<void> tlApplicationCaughtException(
-      {dynamic caughtException,
-      StackTrace? stack,
-      Map<String, String>? appData}) async {
+  static Future<void> tlApplicationCaughtException({
+    dynamic caughtException,
+    StackTrace? stack,
+    Map<String, String>? appData,
+  }) async {
     try {
       if (caughtException == null) {
         throw ConnectException.create(
-            code: 4, msg: 'User caughtException is null');
+          code: 4,
+          msg: 'User caughtException is null',
+        );
       }
       await _channel.invokeMethod('exception', {
         "name": caughtException.runtimeType.toString(),
         "message": caughtException.toString(),
         "stacktrace": stack == null ? "" : stack.toString(),
         "handled": true,
-        "appdata": appData
+        "appdata": appData,
       });
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process user caught exception message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process user caught exception message!',
+      );
     }
   }
 
   ///
   /// For global unhandled exception
   ///
-  static Future<void> onTlException(
-      {required Map<dynamic, dynamic> data}) async {
+  static Future<void> onTlException({
+    required Map<dynamic, dynamic> data,
+  }) async {
     try {
       await _channel.invokeMethod('exception', data);
     } on PlatformException catch (pe) {
       tlLogger.t(
-          'Unable to log app exception: ${pe.message}, stack: ${pe.stacktrace}');
+        'Unable to log app exception: ${pe.message}, stack: ${pe.stacktrace}',
+      );
       throw ConnectException(pe, msg: ConnectException.logErrorMsg);
     }
   }
@@ -965,9 +1067,12 @@ class PluginConnect {
       await _channel.invokeMethod('pointerEvent', fields);
     } on PlatformException catch (pe, stack) {
       tlLogger.t(
-          "pointerEvent exception: ${pe.toString()}, stack: ${stack.toString()}");
-      throw ConnectException(pe,
-          msg: 'Unable to process flutter pointer event message!');
+        "pointerEvent exception: ${pe.toString()}, stack: ${stack.toString()}",
+      );
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process flutter pointer event message!',
+      );
     }
   }
 
@@ -980,12 +1085,13 @@ class PluginConnect {
   /// [layoutParameters]: Layout parameters associated with the gesture event, if any.
   ///
   /// Throws a [ConnectException] if the gesture type is not supported or if there is an error processing the gesture message.
-  static Future<void> onTlGestureEvent(
-      {required String? gesture,
-      required String id,
-      required String target,
-      Map<String, dynamic>? data,
-      List<Map<String, dynamic>>? layoutParameters}) async {
+  static Future<void> onTlGestureEvent({
+    required String? gesture,
+    required String id,
+    required String target,
+    Map<String, dynamic>? data,
+    List<Map<String, dynamic>>? layoutParameters,
+  }) async {
     try {
       if (["pinch", "swipe", "taphold", "doubletap", "tap"].contains(gesture)) {
         return await _channel.invokeMethod('gesture', <dynamic, dynamic>{
@@ -993,11 +1099,13 @@ class PluginConnect {
           'id': id,
           'target': target,
           'data': data,
-          'layoutParameters': layoutParameters ?? <Map<String, dynamic>>[]
+          'layoutParameters': layoutParameters ?? <Map<String, dynamic>>[],
         });
       }
       throw ConnectException.create(
-          code: 3, msg: 'Illegal gesture type: "$gesture"');
+        code: 3,
+        msg: 'Illegal gesture type: "$gesture"',
+      );
     } on PlatformException catch (pe) {
       throw ConnectException(pe, msg: 'Unable to process gesture message!');
     }
@@ -1025,12 +1133,14 @@ class PluginConnect {
   static Future<void> logScreenLayout(String logicalPageName) async {
     try {
       /// First logs the screen widgets, then call Connect screen capture API
-      logWidgetTree().then((result) {
-        /// Captures screen load event, with page name
-        PluginConnect.onScreenview("LOAD", logicalPageName, result);
-      }).catchError((error) {
-        tlLogger.e('Error: $error');
-      });
+      logWidgetTree()
+          .then((result) {
+            /// Captures screen load event, with page name
+            PluginConnect.onScreenview("LOAD", logicalPageName, result);
+          })
+          .catchError((error) {
+            tlLogger.e('Error: $error');
+          });
     } on PlatformException catch (pe) {
       throw ConnectException(pe, msg: 'Unable to process screen capture');
     }
@@ -1057,15 +1167,20 @@ class PluginConnect {
   /// Throws:
   /// - [ConnectException]: If there is an issue processing the logScreenViewContextUnLoad message.
   static Future<void> logScreenViewContextUnLoad(
-      String logicalPageName, String referrer) async {
+    String logicalPageName,
+    String referrer,
+  ) async {
     try {
       // Send the screen view event to the native side
-      return await _channel.invokeMethod('logScreenViewContextUnLoad',
-          <dynamic, dynamic>{'name': logicalPageName, 'referrer': referrer});
+      return await _channel.invokeMethod(
+        'logScreenViewContextUnLoad',
+        <dynamic, dynamic>{'name': logicalPageName, 'referrer': referrer},
+      );
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg:
-              'Unable to process logScreenViewContextUnLoad (update) message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process logScreenViewContextUnLoad (update) message!',
+      );
     }
   }
 
@@ -1082,23 +1197,30 @@ class PluginConnect {
   ///
   /// Throws a [ConnectException] if the provided `tlType` argument is not one of the allowed types
   /// or when the native platform throws a [PlatformException].
-  static Future<void> onScreenview(String tlType, String logicalPageName,
-      [List<Map<String, dynamic>>? layoutParameters]) async {
+  static Future<void> onScreenview(
+    String tlType,
+    String logicalPageName, [
+    List<Map<String, dynamic>>? layoutParameters,
+  ]) async {
     try {
       if (["LOAD", "UNLOAD", "VISIT"].contains(tlType)) {
         // Send the screen view event to -the native side
         return await _channel.invokeMethod('screenview', <dynamic, dynamic>{
           'tlType': tlType,
           'logicalPageName': logicalPageName,
-          'layoutParameters': layoutParameters
+          'layoutParameters': layoutParameters,
         });
       }
 
       throw ConnectException.create(
-          code: 2, msg: 'Illegal screenview transition type');
+        code: 2,
+        msg: 'Illegal screenview transition type',
+      );
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process screen view (update) message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process screen view (update) message!',
+      );
     }
   }
 
@@ -1106,18 +1228,24 @@ class PluginConnect {
     try {
       return await _channel.invokeMethod('getGlobalConfiguration');
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process global configuration settings message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process global configuration settings message!',
+      );
     }
   }
 
   static Future<String> maskText(String text, [String? page]) async {
     try {
-      return await _channel.invokeMethod(
-          'maskText', <dynamic, dynamic>{'text': text, 'page': page ?? ""});
+      return await _channel.invokeMethod('maskText', <dynamic, dynamic>{
+        'text': text,
+        'page': page ?? "",
+      });
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process string masking request!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process string masking request!',
+      );
     }
   }
 
@@ -1126,17 +1254,23 @@ class PluginConnect {
   }
 
   static void tlFocusChanged(
-      String widgetId, double x, double y, bool focused) async {
+    String widgetId,
+    double x,
+    double y,
+    bool focused,
+  ) async {
     try {
       await _channel.invokeMethod('focuschanged', <dynamic, dynamic>{
         'widgetId': widgetId,
         'x': x.toString(),
         'y': y.toString(),
-        'focused': focused.toString()
+        'focused': focused.toString(),
       });
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process focus change message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process focus change message!',
+      );
     }
   }
 
@@ -1155,16 +1289,17 @@ class PluginConnect {
   ///
   /// Returns true if log performance event succeed, false otherwise
   ///
-  static Future<bool> logPerformanceEvent(
-      {final int navigationType = 0,
-      final int redirectCount = 0,
-      final int navigationStart = 0,
-      final int unloadEventStart = 0,
-      final int unloadEventEnd = 0,
-      final int redirectStart = 0,
-      final int redirectEnd = 0,
-      final int loadEventStart = 0,
-      final int loadEventEnd = 0}) async {
+  static Future<bool> logPerformanceEvent({
+    final int navigationType = 0,
+    final int redirectCount = 0,
+    final int navigationStart = 0,
+    final int unloadEventStart = 0,
+    final int unloadEventEnd = 0,
+    final int redirectStart = 0,
+    final int redirectEnd = 0,
+    final int loadEventStart = 0,
+    final int loadEventEnd = 0,
+  }) async {
     try {
       if (navigationType < 0) {
         throw ArgumentError("navigationType must be positive");
@@ -1194,19 +1329,21 @@ class PluginConnect {
 
       return await _channel
           .invokeMethod('logPerformanceEvent', <dynamic, dynamic>{
-        'navigationType': navigationType.toString(),
-        'redirectCount': redirectCount.toString(),
-        'navigationStart': navigationStart.toString(),
-        'unloadEventStart': unloadEventStart.toString(),
-        'unloadEventEnd': unloadEventEnd.toString(),
-        'redirectStart': redirectStart.toString(),
-        'redirectEnd': redirectEnd.toString(),
-        'loadEventStart': loadEventStart.toString(),
-        'loadEventEnd': loadEventEnd.toString()
-      });
+            'navigationType': navigationType.toString(),
+            'redirectCount': redirectCount.toString(),
+            'navigationStart': navigationStart.toString(),
+            'unloadEventStart': unloadEventStart.toString(),
+            'unloadEventEnd': unloadEventEnd.toString(),
+            'redirectStart': redirectStart.toString(),
+            'redirectEnd': redirectEnd.toString(),
+            'loadEventStart': loadEventStart.toString(),
+            'loadEventEnd': loadEventEnd.toString(),
+          });
     } on PlatformException catch (pe) {
-      throw ConnectException(pe,
-          msg: 'Unable to process log performance event message!');
+      throw ConnectException(
+        pe,
+        msg: 'Unable to process log performance event message!',
+      );
     }
   }
 
@@ -1228,8 +1365,10 @@ class PluginConnect {
   ///   "currency": "USD",
   /// });
   /// ```
-  static Future<void> logSignal(
-      {required Map<String, dynamic> signalData, int? logLevel}) async {
+  static Future<void> logSignal({
+    required Map<String, dynamic> signalData,
+    int? logLevel,
+  }) async {
     try {
       if (!ConnectHelper.captureScreen) {
         return;
@@ -1249,9 +1388,13 @@ class PluginConnect {
   /// [key] The configuration key.
   /// [moduleName] The name of the module.
   static Future<bool> getBooleanConfigItemForKey(
-      String key, String moduleName) async {
-    return await _channel.invokeMethod(
-        'getBooleanConfigItemForKey', {'key': key, 'moduleName': moduleName});
+    String key,
+    String moduleName,
+  ) async {
+    return await _channel.invokeMethod('getBooleanConfigItemForKey', {
+      'key': key,
+      'moduleName': moduleName,
+    });
   }
 
   /// Gets a string configuration item for the specified key.
@@ -1259,10 +1402,16 @@ class PluginConnect {
   /// [key] The configuration key.
   /// [moduleName] The name of the module.
   /// [defaultValue] The default value to return if the key is not found.
-  static Future<String?> getStringItemForKey(String key, String moduleName,
-      {String? defaultValue}) async {
-    return await _channel.invokeMethod('getStringItemForKey',
-        {'key': key, 'moduleName': moduleName, 'theDefault': defaultValue});
+  static Future<String?> getStringItemForKey(
+    String key,
+    String moduleName, {
+    String? defaultValue,
+  }) async {
+    return await _channel.invokeMethod('getStringItemForKey', {
+      'key': key,
+      'moduleName': moduleName,
+      'theDefault': defaultValue,
+    });
   }
 
   /// Gets a number configuration item for the specified key.
@@ -1270,10 +1419,16 @@ class PluginConnect {
   /// [key] The configuration key.
   /// [moduleName] The name of the module.
   /// [defaultValue] The default value to return if the key is not found.
-  static Future<int?> getNumberItemForKey(String key, String moduleName,
-      {int defaultValue = 0}) async {
-    return await _channel.invokeMethod('getNumberItemForKey',
-        {'key': key, 'moduleName': moduleName, 'theDefault': defaultValue});
+  static Future<int?> getNumberItemForKey(
+    String key,
+    String moduleName, {
+    int defaultValue = 0,
+  }) async {
+    return await _channel.invokeMethod('getNumberItemForKey', {
+      'key': key,
+      'moduleName': moduleName,
+      'theDefault': defaultValue,
+    });
   }
 
   /// Sets a boolean configuration item for the specified key.
@@ -1282,9 +1437,15 @@ class PluginConnect {
   /// [value] The configuration value.
   /// [moduleName] The name of the module.
   static Future<bool> setBooleanConfigItemForKey(
-      String key, bool value, String moduleName) async {
-    return await _channel.invokeMethod('setBooleanConfigItemForKey',
-        {'key': key, 'value': value, 'moduleName': moduleName});
+    String key,
+    bool value,
+    String moduleName,
+  ) async {
+    return await _channel.invokeMethod('setBooleanConfigItemForKey', {
+      'key': key,
+      'value': value,
+      'moduleName': moduleName,
+    });
   }
 
   /// Sets a string configuration item for the specified key.
@@ -1293,9 +1454,15 @@ class PluginConnect {
   /// [value] The configuration value.
   /// [moduleName] The name of the module.
   static Future<dynamic> setStringItemForKey(
-      String key, String value, String moduleName) async {
-    return await _channel.invokeMethod('setStringItemForKey',
-        {'key': key, 'value': value, 'moduleName': moduleName});
+    String key,
+    String value,
+    String moduleName,
+  ) async {
+    return await _channel.invokeMethod('setStringItemForKey', {
+      'key': key,
+      'value': value,
+      'moduleName': moduleName,
+    });
   }
 
   /// Sets a number configuration item for the specified key.
@@ -1305,9 +1472,15 @@ class PluginConnect {
   /// [moduleName] The name of the module.
   /// [defaultValue] The default value to return if the key is not found.
   static Future<dynamic> setNumberItemForKey(
-      String key, num value, String moduleName) async {
-    return await _channel.invokeMethod('setNumberItemForKey',
-        {'key': key, 'value': value, 'moduleName': moduleName});
+    String key,
+    num value,
+    String moduleName,
+  ) async {
+    return await _channel.invokeMethod('setNumberItemForKey', {
+      'key': key,
+      'value': value,
+      'moduleName': moduleName,
+    });
   }
 }
 
@@ -1321,7 +1494,8 @@ class UserInteractionLogger {
     ///
     FlutterError.onError = (errorDetails) {
       PluginConnect.onTlException(
-          data: Connect.flutterErrorDetailsToMap(errorDetails));
+        data: Connect.flutterErrorDetailsToMap(errorDetails),
+      );
     };
     // _setupGestureLogging();
     // _setupNavigationLogging();
@@ -1357,9 +1531,7 @@ class PerformanceObserver extends WidgetsBindingObserver {
   void didHaveMemoryPressure() {
     PluginConnect.tlApplicationCustomEvent(
       eventName: 'Performance Metric',
-      customData: {
-        'didHaveMemoryPressure': 'true',
-      },
+      customData: {'didHaveMemoryPressure': 'true'},
       logLevel: 1,
     );
 

@@ -7,15 +7,18 @@ class SetupMobilePlatforms {
     if (!Directory('$projectDir/android').existsSync() ||
         !Directory('$projectDir/ios').existsSync()) {
       stdout.writeln(
-          "Error with Flutter project's root directory. Please confirm the directory contains an android and ios directory.");
+        "Error with Flutter project's root directory. Please confirm the directory contains an android and ios directory.",
+      );
       exit(1);
     }
 
     // Set up Android
     // Copy assets from plugin to flutter project
     print("\nCopying Android assets");
-    bool androidSuccess = copyAssets('$flutterDir/automation/android/',
-        '$projectDir/android/app/src/main/assets/');
+    bool androidSuccess = copyAssets(
+      '$flutterDir/automation/android/',
+      '$projectDir/android/app/src/main/assets/',
+    );
 
     if (androidSuccess) {
       stdout.writeln("Complete Copying Android assets\n");
@@ -25,6 +28,18 @@ class SetupMobilePlatforms {
 
     // Update build gradle
     String androidBuildGradle = '$projectDir/android/app/build.gradle';
+
+    // Check if build.gradle file exists
+    if (!File(androidBuildGradle).existsSync()) {
+      stdout.writeln(
+        "Error: build.gradle file not found at $androidBuildGradle",
+      );
+      androidBuildGradle = '$projectDir/android/app/build.gradle.kts';
+      stdout.writeln(
+        "Error: I will now try to use build.gradle.kts file at $androidBuildGradle",
+      );
+    }
+
     updateBuildGradle(androidBuildGradle);
 
     // Update config
@@ -54,6 +69,7 @@ class SetupMobilePlatforms {
       return false;
     }
   }
+
   void updateBuildGradle(String androidBuildGradle) {
     String content = File(androidBuildGradle).readAsStringSync();
     content = content.replaceFirst(RegExp(r'flutter\.minSdkVersion'), '21');
@@ -65,7 +81,8 @@ class SetupMobilePlatforms {
         'maven { url "https://s01.oss.sonatype.org/content/repositories/staging" }';
 
     RegExp mavenUrlPattern = RegExp(
-        r'\s*maven\s*{\s*url\s*"https://s01\.oss\.sonatype\.org/content/repositories/staging"\s*}\s*');
+      r'\s*maven\s*{\s*url\s*"https://s01\.oss\.sonatype\.org/content/repositories/staging"\s*}\s*',
+    );
 
     // Read the content of the file.
     String content = File(androidBuildGradle).readAsStringSync();
@@ -102,8 +119,7 @@ class SetupMobilePlatforms {
 
   /// Which SDK version to be used by plugin
   ///
-  void updateSDKBuildVersion(
-    String androidBuildGradle, String connectVersion) {
+  void updateSDKBuildVersion(String androidBuildGradle, String connectVersion) {
     String content = File(androidBuildGradle).readAsStringSync();
 
     String dependencyRegex =

@@ -1,3 +1,46 @@
+## 2.36.4-beta
+Beta Connect-Flutter Change Notes: 
+Bug Fixes
+
+- Fix issue with not updating logicalPageName from AutoLayout/<<Navigation Route Name>>
+
+Improvements
+
+- Add support to set a logicalPageName for route item that does not have a value for property name.
+  With the following logic:
+		- First checking if route.settings.name exists and is not empty
+		- If null/empty, it examines the route's runtime type to provide meaningful names:
+			- ModalBottomSheetRoute → 'ModalBottomSheet'
+			- DialogRoute → 'Dialog'
+			- PopupRoute → 'Popup'
+			- PageRoute → 'Page_{hashCode}'
+			- Any other route type → '{RouteType}_{hashCode}'
+- Add support for Android build.gradle.kts.
+
+Our environment for this release:
+
+- Flutter SDK 3.27.4
+- Visual Studio Code Version: 1.99.3 (Universal)
+- Xcode 26.1
+- MacOS 26.0.1
+- iOS 13.x to 26.x
+- Supported architectures:
+	- simulator
+		- arm64
+		- x86_64
+	- device
+		- arm64
+-Android 21-35
+
+
+Known Issues
+
+- Android & IOS platforms are supported.
+- When Navigation route isn't set, replay shows null screenview.
+- Text change event not supported yet.
+- Sometimes masking overlay carries to next screen due to Flutter view tree design.
+
+
 ## 2.36.3-beta
 Beta Connect-Flutter Change Notes: 
 Bug Fixes

@@ -48,8 +48,12 @@ class WidgetPath {
     return result;
   }
 
-  WidgetPath.create(this.context,
-      {this.shorten = true, this.hash = false, String exclude = excl}) {
+  WidgetPath.create(
+    this.context, {
+    this.shorten = true,
+    this.hash = false,
+    String exclude = excl,
+  }) {
     if (context == null) {
       return;
     }
@@ -101,7 +105,8 @@ class WidgetPath {
     parentWidgetType = parent!.widget.runtimeType.toString();
 
     tlLogger.t(
-        'Widget path added: ${widget.runtimeType.toString()}, path: $this.path, digest: ${widgetDigest()}');
+      'Widget path added: ${widget.runtimeType.toString()}, path: $this.path, digest: ${widgetDigest()}',
+    );
   }
 
   List<int> findExistingPathKeys() {
@@ -147,11 +152,13 @@ class WidgetPath {
           tlLogger.t('Replacing logged widget: $key, position: $position');
         } else {
           tlLogger.t(
-              'Removing $keyCount siblings(new key: $key): ...${firstPath.path.substring(max(0, firstPath.path.length - 90))}');
+            'Removing $keyCount siblings(new key: $key): ...${firstPath.path.substring(max(0, firstPath.path.length - 90))}',
+          );
           for (int eKey in existingKeys) {
             WidgetPath wp = widgetContexts[eKey];
             tlLogger.t(
-                'Removing $eKey, position: ${wp.position}, used: ${wp.usedInLayout}');
+              'Removing $eKey, position: ${wp.position}, used: ${wp.usedInLayout}',
+            );
             removePath(eKey);
           }
         }
@@ -316,42 +323,47 @@ class TlBinder extends WidgetsBindingObserver {
         final String direction = swipe.direction;
 
         tlLogger.t(
-            'Scrollable start timestamp: ${swipe.getStartTimestampString()}');
+          'Scrollable start timestamp: ${swipe.getStartTimestampString()}',
+        );
         tlLogger.t(
-            'Scrollable, start: ${start?.dx},${start?.dy}, end: ${end?.dx},${end?.dy}, velocity: $velocity, direction: $direction');
+          'Scrollable, start: ${start?.dx},${start?.dy}, end: ${end?.dx},${end?.dy}, velocity: $velocity, direction: $direction',
+        );
 
-        logWidgetTree().then((result) async {
-          // TODO: missing context?
-          // var touchedTarget = findTouchedWidget(context, details.position);
+        logWidgetTree()
+            .then((result) async {
+              // TODO: missing context?
+              // var touchedTarget = findTouchedWidget(context, details.position);
 
-          if (ConnectHelper.captureScreen) {
-            await PluginConnect.onTlGestureEvent(
-                gesture: 'swipe',
-                id: '../Scrollable',
-                target: 'Scrollable',
-                data: <String, dynamic>{
-                  'pointer1': {
-                    'dx': start?.dx,
-                    'dy': start?.dy,
-                    'ts': swipe.getStartTimestampString()
+              if (ConnectHelper.captureScreen) {
+                await PluginConnect.onTlGestureEvent(
+                  gesture: 'swipe',
+                  id: '../Scrollable',
+                  target: 'Scrollable',
+                  data: <String, dynamic>{
+                    'pointer1': {
+                      'dx': start?.dx,
+                      'dy': start?.dy,
+                      'ts': swipe.getStartTimestampString(),
+                    },
+                    'pointer2': {
+                      'dx': end?.dx,
+                      'dy': end?.dy,
+                      'ts': swipe.getUpdateTimestampString(),
+                    },
+                    'velocity': {
+                      'dx': velocity?.pixelsPerSecond.dx,
+                      'dy': velocity?.pixelsPerSecond.dy,
+                    },
+                    'direction': direction,
                   },
-                  'pointer2': {
-                    'dx': end?.dx,
-                    'dy': end?.dy,
-                    'ts': swipe.getUpdateTimestampString()
-                  },
-                  'velocity': {
-                    'dx': velocity?.pixelsPerSecond.dx,
-                    'dy': velocity?.pixelsPerSecond.dy
-                  },
-                  'direction': direction,
-                },
-                layoutParameters: result);
-          }
-        }).catchError((error) {
-          // Handle errors if the async function throws an error
-          tlLogger.e('Error: $error');
-        });
+                  layoutParameters: result,
+                );
+              }
+            })
+            .catchError((error) {
+              // Handle errors if the async function throws an error
+              tlLogger.e('Error: $error');
+            });
 
         // For Cancelling the pointerUp event
         Connect.isSwiping = false;
@@ -385,14 +397,20 @@ class TlBinder extends WidgetsBindingObserver {
 
   Future<bool?> getMaskingEnabled() async {
     if (maskingEnabled == null) {
-      maskingEnabled = await _TlConfiguration()
-              .get("GlobalScreenSettings/Masking/HasMasking") ??
+      maskingEnabled =
+          await _TlConfiguration().get(
+            "GlobalScreenSettings/Masking/HasMasking",
+          ) ??
           false;
-      maskIds = await _TlConfiguration()
-              .get("GlobalScreenSettings/Masking/MaskIdList") ??
+      maskIds =
+          await _TlConfiguration().get(
+            "GlobalScreenSettings/Masking/MaskIdList",
+          ) ??
           [];
-      maskValuePatterns = await _TlConfiguration()
-              .get("GlobalScreenSettings/Masking/MaskValueList") ??
+      maskValuePatterns =
+          await _TlConfiguration().get(
+            "GlobalScreenSettings/Masking/MaskValueList",
+          ) ??
           [];
     }
     return maskingEnabled;
@@ -418,7 +436,9 @@ class TlBinder extends WidgetsBindingObserver {
           initEnvironment = false;
 
           await PluginConnect.tlSetEnvironment(
-              screenWidth: screenWidth, screenHeight: screenHeight);
+            screenWidth: screenWidth,
+            screenHeight: screenHeight,
+          );
 
           tlLogger.t('TlBinder, renderView w: $screenWidth, h: $screenHeight');
         }
@@ -469,29 +489,34 @@ class TlBinder extends WidgetsBindingObserver {
   Future<void> getFrameRateConfiguration() async {
     rapidFrameRateLimitMs =
         await _TlConfiguration().get("GlobalScreenSettings/RapidFrameRate") ??
-            160;
+        160;
     rapidSequenceCompleteMs =
         await _TlConfiguration().get("GlobalScreenSettings/RapidFrameDone") ??
-            (2 * rapidSequenceCompleteMs);
+        (2 * rapidSequenceCompleteMs);
     initRapidFrameRate = false;
   }
 
   Future<String> maskText(String text) async {
     final bool? maskingEnabled = await getMaskingEnabled();
     if (maskingEnabled!) {
-      if ((await _TlConfiguration()
-                  .get("GlobalScreenSettings/Masking/HasCustomMask") ??
+      if ((await _TlConfiguration().get(
+                "GlobalScreenSettings/Masking/HasCustomMask",
+              ) ??
               "")
           .toString()
           .contains("true")) {
-        final String? smallCase = await _TlConfiguration()
-            .get("GlobalScreenSettings/Masking/Sensitive/smallCaseAlphabet");
-        final String? capitalCase = await _TlConfiguration()
-            .get("GlobalScreenSettings/Masking/Sensitive/capitalCaseAlphabet");
-        final String? symbol = await _TlConfiguration()
-            .get("GlobalScreenSettings/Masking/Sensitive/symbol");
-        final String? number = await _TlConfiguration()
-            .get("GlobalScreenSettings/Masking/Sensitive/number");
+        final String? smallCase = await _TlConfiguration().get(
+          "GlobalScreenSettings/Masking/Sensitive/smallCaseAlphabet",
+        );
+        final String? capitalCase = await _TlConfiguration().get(
+          "GlobalScreenSettings/Masking/Sensitive/capitalCaseAlphabet",
+        );
+        final String? symbol = await _TlConfiguration().get(
+          "GlobalScreenSettings/Masking/Sensitive/symbol",
+        );
+        final String? number = await _TlConfiguration().get(
+          "GlobalScreenSettings/Masking/Sensitive/number",
+        );
 
         // Note: The following r"\p{..} expressions have been flagged erroneously as errors in some versions of the IDE
         //       However, they work fine and also do NOT show up in linter, so they do not break CI/CD
@@ -524,14 +549,15 @@ class TlBinder extends WidgetsBindingObserver {
         "y": "0",
         "x": "0",
         "width": "$screenWidth",
-        "height": "$screenHeight"
+        "height": "$screenHeight",
       },
       "idType": -4,
       "style": <String, dynamic>{
         "borderColor": 0,
         ""
-            "borderAlpha": 1,
-        "borderRadius": 0
+                "borderAlpha":
+            1,
+        "borderRadius": 0,
       },
       "cssId": "w0v0v0FlutterView0",
       "image": <String, dynamic>{
@@ -541,8 +567,8 @@ class TlBinder extends WidgetsBindingObserver {
         "value": "",
         "mimeExtension": "",
         "type": "image",
-        "base64Image": ""
-      }
+        "base64Image": "",
+      },
     };
   }
 
@@ -579,8 +605,9 @@ class TlBinder extends WidgetsBindingObserver {
       final String contextString = context.toString();
       if (contextString.startsWith('State') &&
           contextString.endsWith('(DEFUNCT)(no widget)')) {
-        tlLogger
-            .t("Deleting obsolete path item: $key, context: $contextString");
+        tlLogger.t(
+          "Deleting obsolete path item: $key, context: $contextString",
+        );
         WidgetPath.removePath(key);
         continue;
       }
@@ -603,7 +630,8 @@ class TlBinder extends WidgetsBindingObserver {
 
         Map<String, dynamic>? accessibility = args['accessibility'];
         bool? maskingEnabled = await getMaskingEnabled();
-        bool masked = maskingEnabled! &&
+        bool masked =
+            maskingEnabled! &&
             (maskIds!.contains(path) || maskIds!.contains(wp.widgetDigest()));
 
         if (subType.compareTo("ImageView") == 0) {
@@ -624,7 +652,8 @@ class TlBinder extends WidgetsBindingObserver {
               if (text!.contains(RegExp(pattern))) {
                 masked = true;
                 tlLogger.t(
-                    'Masking matched content with RE: $pattern, text: $text');
+                  'Masking matched content with RE: $pattern, text: $text',
+                );
                 break;
               }
             }
@@ -637,20 +666,23 @@ class TlBinder extends WidgetsBindingObserver {
             }
 
             tlLogger.t(
-                "Text Layout masked text: $text, Widget: ${widget.runtimeType.toString()}, "
-                "Digest for MASKING: ${wp.widgetDigest()}");
+              "Text Layout masked text: $text, Widget: ${widget.runtimeType.toString()}, "
+              "Digest for MASKING: ${wp.widgetDigest()}",
+            );
           } else {
             tlLogger.t(
-                "Text Layout text: $text, Widget: ${widget.runtimeType.toString()}");
+              "Text Layout text: $text, Widget: ${widget.runtimeType.toString()}",
+            );
           }
 
           font = {
             'family': style.fontFamily,
             'size': style.fontSize.toString(),
-            'bold': (FontWeight.values.indexOf(style.fontWeight!) >
-                    FontWeight.values.indexOf(FontWeight.normal))
-                .toString(),
-            'italic': (style.fontStyle == FontStyle.italic).toString()
+            'bold':
+                (FontWeight.values.indexOf(style.fontWeight!) >
+                        FontWeight.values.indexOf(FontWeight.normal))
+                    .toString(),
+            'italic': (style.fontStyle == FontStyle.italic).toString(),
           };
 
           double top = 0, bottom = 0, left = 0, right = 0;
@@ -699,7 +731,8 @@ class TlBinder extends WidgetsBindingObserver {
           tlLogger.t("Adding image to layouts....");
         }
         tlLogger.t(
-            '--> Layout Flutter -- x: ${position.dx}, y: ${position.dy}, width: ${box.size.width.toInt()}, text: $text');
+          '--> Layout Flutter -- x: ${position.dx}, y: ${position.dy}, width: ${box.size.width.toInt()}, text: $text',
+        );
 
         layouts.add(<String, dynamic>{
           'id': path,
@@ -720,21 +753,23 @@ class TlBinder extends WidgetsBindingObserver {
           'currState': <String, dynamic>{
             'text': text,
             'placeHolder': "", // TBD??
-            'font': font
+            'font': font,
           },
           if (image != null) 'image': image,
           if (aStyle != null) 'style': aStyle,
           if (accessibility != null) 'accessibility': accessibility,
           'originalId': path.replaceAll("/", ""),
-          'masked': '$masked'
+          'masked': '$masked',
         });
       }
     }
-    layoutParametersForGestures =
-        hasGestures ? List.unmodifiable(layouts) : null;
+    layoutParametersForGestures = hasGestures
+        ? List.unmodifiable(layouts)
+        : null;
 
     tlLogger.t(
-        "WigetPath cache size, before: $pathCount, after: ${WidgetPath.size}, # of layouts: ${layouts.length}");
+      "WigetPath cache size, before: $pathCount, after: ${WidgetPath.size}, # of layouts: ${layouts.length}",
+    );
 
     return layouts;
   }
@@ -808,8 +843,9 @@ class _Swipe {
 
   String _getSwipeDirection(Offset offset) {
     final int axis = offset.dx.abs() < offset.dy.abs() ? 2 : 0;
-    final int direction =
-        (axis == 0) ? (offset.dx < 0 ? 1 : 0) : (offset.dy < 0 ? 1 : 0);
+    final int direction = (axis == 0)
+        ? (offset.dx < 0 ? 1 : 0)
+        : (offset.dy < 0 ? 1 : 0);
     return (_direction = directions[axis + direction]);
   }
 }
@@ -842,12 +878,7 @@ class AccessiblePosition {
       'id': id,
       'label': label,
       'hint': hint,
-      'position': {
-        'x': dx,
-        'y': dy,
-        'width': width,
-        'height': height,
-      },
+      'position': {'x': dx, 'y': dy, 'width': width, 'height': height},
     };
   }
 }
@@ -900,8 +931,8 @@ class ConnectHelper {
         'accessibility': {
           'id': '/GestureDetector',
           'label': label ?? '',
-          'hint': hint ?? ''
-        }
+          'hint': hint ?? '',
+        },
       });
     }
     return accessibility;
@@ -922,7 +953,8 @@ class ConnectHelper {
   static void gestureHelper({Widget? gesture, String? gestureType}) async {
     if (gesture == null) {
       tlLogger.w(
-          'Warning: Gesture is null in gestureHelper, type: ${gestureType ?? "<NONE>"}');
+        'Warning: Gesture is null in gestureHelper, type: ${gestureType ?? "<NONE>"}',
+      );
       return;
     }
     final int hashCode = gesture.hashCode;
@@ -934,20 +966,23 @@ class ConnectHelper {
       final Map<String, dynamic> accessibility = checkForSemantics(wp);
 
       tlLogger.t(
-          '${gestureType!.toUpperCase()}: Gesture widget, context hash: ${context.hashCode}, widget hash: $hashCode');
+        '${gestureType!.toUpperCase()}: Gesture widget, context hash: ${context.hashCode}, widget hash: $hashCode',
+      );
       tlLogger.t('--> Path: ${wp.widgetPath()}, digest: ${wp.widgetDigest()}');
 
       if (ConnectHelper.captureScreen) {
         await PluginConnect.onTlGestureEvent(
-            gesture: gestureType,
-            id: wp.widgetPath(),
-            target: gestureTarget,
-            data: accessibility.isNotEmpty ? accessibility : null,
-            layoutParameters: TlBinder.layoutParametersForGestures);
+          gesture: gestureType,
+          id: wp.widgetPath(),
+          target: gestureTarget,
+          data: accessibility.isNotEmpty ? accessibility : null,
+          layoutParameters: TlBinder.layoutParametersForGestures,
+        );
       }
     } else {
       tlLogger.t(
-          "ERROR: ${gesture.runtimeType.toString()} gesture not found for hashcode: $hashCode");
+        "ERROR: ${gesture.runtimeType.toString()} gesture not found for hashcode: $hashCode",
+      );
     }
   }
 
@@ -965,7 +1000,9 @@ class ConnectHelper {
   }
 
   static Map<String, dynamic> errorDetailsHelper(
-      FlutterErrorDetails fed, String type) {
+    FlutterErrorDetails fed,
+    String type,
+  ) {
     final Map<String, dynamic> data = {};
     final String errorString = fed.exception.runtimeType.toString();
 
@@ -975,7 +1012,8 @@ class ConnectHelper {
     data["handled"] = true;
 
     tlLogger.t(
-        "!!! Flutter exception, type: $type, class: $errorString, hash: ${fed.exception.hashCode}");
+      "!!! Flutter exception, type: $type, class: $errorString, hash: ${fed.exception.hashCode}",
+    );
 
     return data;
   }
@@ -988,11 +1026,11 @@ class ConnectHelper {
 
       map['position'] = {
         'dx': pointerEvent.position.dx,
-        'dy': pointerEvent.position.dy
+        'dy': pointerEvent.position.dy,
       };
       map['localPosition'] = {
         'dx': pointerEvent.localPosition.dx,
-        'dy': pointerEvent.localPosition.dy
+        'dy': pointerEvent.localPosition.dy,
       };
       map['down'] = pointerEvent.down;
       map['kind'] = pointerEvent.kind.index;
@@ -1005,13 +1043,14 @@ class ConnectHelper {
     return map;
   }
 
-  static void pinchGestureHelper(
-      {required Widget? gesture,
-      required String onType,
-      Offset? offset,
-      double? scale,
-      Velocity? velocity,
-      int fingers = 0}) async {
+  static void pinchGestureHelper({
+    required Widget? gesture,
+    required String onType,
+    Offset? offset,
+    double? scale,
+    Velocity? velocity,
+    int fingers = 0,
+  }) async {
     if (gesture == null) {
       tlLogger.w('Warning: Gesture is null in pinchGestureHelper');
       return;
@@ -1025,7 +1064,8 @@ class ConnectHelper {
       final Map<String, dynamic> accessibility = checkForSemantics(wp);
 
       tlLogger.t(
-          '${onType.toUpperCase()}: Gesture widget, context hash: ${context.hashCode}, widget hash: $hashCode');
+        '${onType.toUpperCase()}: Gesture widget, context hash: ${context.hashCode}, widget hash: $hashCode',
+      );
 
       switch (onType) {
         case _onScaleStart:
@@ -1052,7 +1092,8 @@ class ConnectHelper {
               pinch.fingers = fingers;
               final String direction = pinch.pinchResult();
               tlLogger.t(
-                  '--> Pinch, fingers: ${pinch.getMaxFingers}, direction: $direction');
+                '--> Pinch, fingers: ${pinch.getMaxFingers}, direction: $direction',
+              );
 
               if (direction.isNotEmpty) {
                 final Offset start = pinch.getStartPosition!;
@@ -1061,20 +1102,21 @@ class ConnectHelper {
 
                 if (ConnectHelper.captureScreen) {
                   await PluginConnect.onTlGestureEvent(
-                      gesture: 'pinch',
-                      id: wp.widgetPath(),
-                      target: gestureTarget,
-                      data: <String, dynamic>{
-                        'pointer1': {'dx': start.dx, 'dy': start.dy},
-                        'pointer2': {'dx': end.dx, 'dy': end.dy},
-                        'direction': direction,
-                        'velocity': {
-                          'dx': velocity?.pixelsPerSecond.dx,
-                          'dy': velocity?.pixelsPerSecond.dy
-                        },
-                        ...accessibility,
+                    gesture: 'pinch',
+                    id: wp.widgetPath(),
+                    target: gestureTarget,
+                    data: <String, dynamic>{
+                      'pointer1': {'dx': start.dx, 'dy': start.dy},
+                      'pointer2': {'dx': end.dx, 'dy': end.dy},
+                      'direction': direction,
+                      'velocity': {
+                        'dx': velocity?.pixelsPerSecond.dx,
+                        'dy': velocity?.pixelsPerSecond.dy,
                       },
-                      layoutParameters: TlBinder.layoutParametersForGestures);
+                      ...accessibility,
+                    },
+                    layoutParameters: TlBinder.layoutParametersForGestures,
+                  );
                 }
               }
             }
@@ -1085,7 +1127,8 @@ class ConnectHelper {
       }
     } else {
       tlLogger.t(
-          "ERROR: ${gesture.runtimeType.toString()} not found for hashcode: $hashCode");
+        "ERROR: ${gesture.runtimeType.toString()} not found for hashcode: $hashCode",
+      );
     }
   }
 
@@ -1118,5 +1161,28 @@ class ConnectHelper {
     }
 
     return false;
+  }
+
+  /// Updates the logical page name for a given screen.
+  ///
+  /// This method takes the name of the screen and a JSON string as input,
+  /// and performs the necessary operations to update the logical page name.
+  ///
+  /// [screenName] The name of the screen whose logical page name is to be updated.
+  /// [jsonString] A JSON string containing the data required for the update.
+  ///
+  /// Returns a [String] representing the updated logical page name.
+  static String updateLogicalPageName(String screenName, String jsonString) {
+    if (jsonString.isEmpty) {
+      return screenName;
+    }
+
+    // Decode JSON
+    final Map<String, dynamic> jsonConfig = jsonDecode(jsonString);
+    if (jsonConfig.containsKey(screenName)) {
+      screenName = jsonConfig[screenName]['DisplayName'] ?? screenName;
+    }
+
+    return screenName;
   }
 }
