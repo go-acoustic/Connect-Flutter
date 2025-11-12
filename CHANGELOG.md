@@ -1,3 +1,37 @@
+## 2.38.0
+Beta Connect-Flutter Change Notes: 
+Bug Fixes
+
+- Fixed documentation link issues.
+
+Improvements
+
+- None.
+
+Our environment for this release:
+
+- Flutter SDK 3.27.4
+- Visual Studio Code Version: 1.99.3 (Universal)
+- Xcode 26.1
+- MacOS 26.0.1
+- iOS 13.x to 26.x
+- Supported architectures:
+	- simulator
+		- arm64
+		- x86_64
+	- device
+		- arm64
+-Android 21-35
+
+
+Known Issues
+
+- Sample App has some build issues due to new version of Flutter, will be replaced in later version.
+- Android & IOS platforms are supported.
+- When Navigation route isn't set, replay shows null screenview.
+- Text change event not supported yet.
+- Sometimes masking overlay carries to next screen due to Flutter view tree design.
+
 ## 2.37.2-beta
 Beta Connect-Flutter Change Notes: 
 Bug Fixes
