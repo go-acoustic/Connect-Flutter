@@ -1,10 +1,10 @@
-## 2.38.0
+## 2.37.4-beta
 Beta Connect-Flutter Change Notes: 
-Bug Fixes
+Bug Fixes:
 
-- Fixed documentation link issues.
+- Default to system value for User-Agent header if it is not available
 
-Improvements
+Improvements:
 
 - None.
 
