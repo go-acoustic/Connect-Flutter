@@ -8,6 +8,9 @@ import 'logger.dart';
 import 'dart:convert';
 import 'package:flutter/rendering.dart';
 
+// Export logging types for SDK users
+export 'logger.dart' show ConnectLogLevel, LoggerConfig;
+
 /// A widget that logs UI change events.
 ///
 /// This [Connect] widget listens to pointer events such as onPointerDown, onPointerUp, onPointerMove, and onPointerCancel.
@@ -904,6 +907,36 @@ class PluginConnect {
         msg: 'Unable to obtain platform version: ${e.toString()}',
       );
     }
+  }
+
+  /// Sets the log level for the Connect SDK
+  ///
+  /// This allows SDK users to control the verbosity of logging output.
+  /// By default, debug level is used in debug builds and error level in release builds.
+  ///
+  /// [level] The desired log level from ConnectLogLevel enum
+  ///
+  /// Example usage:
+  /// ```dart
+  /// // Disable all logging
+  /// PluginConnect.setLogLevel(ConnectLogLevel.off);
+  ///
+  /// // Enable trace logging for detailed debugging
+  /// PluginConnect.setLogLevel(ConnectLogLevel.trace);
+  ///
+  /// // Show only errors
+  /// PluginConnect.setLogLevel(ConnectLogLevel.error);
+  /// ```
+  static void setLogLevel(ConnectLogLevel level) {
+    LoggerConfig.setLogLevel(level);
+    tlLogger.t('Connect SDK log level set to: ${level.toString()}');
+  }
+
+  /// Gets the current log level for the Connect SDK
+  ///
+  /// Returns the current ConnectLogLevel setting
+  static ConnectLogLevel getLogLevel() {
+    return LoggerConfig.logLevel;
   }
 
   static Future<String> get appKey async {
