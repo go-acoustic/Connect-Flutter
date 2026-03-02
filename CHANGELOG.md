@@ -1,4 +1,4 @@
-## 2.39.0
+## 2.38.2-beta
 Beta Connect-Flutter Change Notes: 
 Bug Fixes:
 
