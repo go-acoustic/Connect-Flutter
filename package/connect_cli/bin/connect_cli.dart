@@ -30,6 +30,9 @@ void main(List<String> arguments) async {
   connect_cli.setupJsonConfig(
       pluginRoot, currentProjectDir, appKey, postmessageURL);
 
+  // Sync iOS SDK variant settings to plugin's automation config (used by podspec)
+  connect_cli.syncIosConfigToPlugin(pluginRoot, currentProjectDir);
+
   // Setup mobile platforms
   stdout.writeln('Setup mobile platforms');
   connect_cli.setupMobilePlatforms(pluginRoot, currentProjectDir);

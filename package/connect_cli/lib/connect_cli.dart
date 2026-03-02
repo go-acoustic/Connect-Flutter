@@ -141,6 +141,52 @@ updateConnectLayoutConfig(BasicConfig basicConfig, String currentProjectDir) {
 //   stdout.writeln('Updated iOS ConnectLayoutConfig.json');
 // }
 
+void syncIosConfigToPlugin(String pluginRoot, String currentProjectDir) {
+  var projectConfigPath = "$currentProjectDir/ConnectConfig.json";
+  var pluginConfigPath = "$pluginRoot/automation/ConnectConfig.json";
+
+  if (!File(projectConfigPath).existsSync()) {
+    stdout.writeln("Warning: $projectConfigPath not found, skipping iOS sync.");
+    return;
+  }
+  if (!File(pluginConfigPath).existsSync()) {
+    stdout.writeln("Warning: $pluginConfigPath not found, skipping iOS sync.");
+    return;
+  }
+
+  try {
+    Map<String, dynamic> projectConfig =
+        jsonDecode(File(projectConfigPath).readAsStringSync());
+    Map<String, dynamic> pluginConfig =
+        jsonDecode(File(pluginConfigPath).readAsStringSync());
+
+    if (projectConfig['Connect'] == null) {
+      stdout.writeln(
+          "Warning: 'Connect' key missing in $projectConfigPath, skipping iOS sync.");
+      return;
+    }
+    if (pluginConfig['Connect'] == null) {
+      stdout.writeln(
+          "Warning: 'Connect' key missing in $pluginConfigPath, skipping iOS sync.");
+      return;
+    }
+
+    // Sync iOS-relevant fields from project config to plugin's automation config
+    pluginConfig['Connect']['useRelease'] =
+        projectConfig['Connect']['useRelease'] ?? false;
+    pluginConfig['Connect']['iOSVersion'] =
+        projectConfig['Connect']['iOSVersion'] ?? '';
+
+    JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    File(pluginConfigPath).writeAsStringSync(encoder.convert(pluginConfig));
+
+    stdout.writeln(
+        'Synced useRelease=${pluginConfig['Connect']['useRelease']} and iOSVersion=${pluginConfig['Connect']['iOSVersion']} to plugin automation config.');
+  } catch (e) {
+    stdout.writeln("Warning: iOS config sync failed: $e");
+  }
+}
+
 updateBasicConfig(
     String pluginRoot, String currentProjectDir, String key, dynamic value) {
   try {
