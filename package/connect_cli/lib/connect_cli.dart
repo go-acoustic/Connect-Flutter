@@ -171,17 +171,15 @@ void syncIosConfigToPlugin(String pluginRoot, String currentProjectDir) {
       return;
     }
 
-    // Sync iOS-relevant fields from project config to plugin's automation config
-    pluginConfig['Connect']['useRelease'] =
-        projectConfig['Connect']['useRelease'] ?? false;
-    pluginConfig['Connect']['iOSVersion'] =
-        projectConfig['Connect']['iOSVersion'] ?? '';
+    // Sync all fields from project config to plugin's automation config
+    projectConfig['Connect'].forEach((key, value) {
+      pluginConfig['Connect'][key] = value;
+    });
 
     JsonEncoder encoder = JsonEncoder.withIndent('  ');
     File(pluginConfigPath).writeAsStringSync(encoder.convert(pluginConfig));
 
-    stdout.writeln(
-        'Synced useRelease=${pluginConfig['Connect']['useRelease']} and iOSVersion=${pluginConfig['Connect']['iOSVersion']} to plugin automation config.');
+    stdout.writeln('Synced all ConnectConfig fields to plugin automation config.');
   } catch (e) {
     stdout.writeln("Warning: iOS config sync failed: $e");
   }
