@@ -1,0 +1,10 @@
+name: AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  builder-critic-review:
+    uses: aipoweredmarketer/ac-builder-critic/.github/workflows/builder-critic.yml@main
+    secrets: inherit

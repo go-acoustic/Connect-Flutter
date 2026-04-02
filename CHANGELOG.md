@@ -1,4 +1,4 @@
-## 2.41.0
+## 2.40.2-beta
 Beta Connect-Flutter Change Notes: 
 Bug Fixes:
 
