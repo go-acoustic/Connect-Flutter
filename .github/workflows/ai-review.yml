@@ -3,6 +3,8 @@ name: AI Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
+  issue_comment:
+    types: [created]
 
 jobs:
   builder-critic-review:
